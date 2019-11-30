@@ -25,12 +25,7 @@ namespace WpfApp_Windows_Project2
             return cropImage;
         }
 
-        public static void setLeftTopImage( Image _selectedBitmap, double left, double top)
-        {
-            Canvas.SetLeft(_selectedBitmap, left);
-            Canvas.SetTop(_selectedBitmap, top);
-        }
-
+      
 
     }
 }
