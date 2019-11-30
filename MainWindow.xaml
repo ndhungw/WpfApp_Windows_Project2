@@ -5,19 +5,48 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp_Windows_Project2"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded">
-    <Grid>
-        <Menu>
+        Title="MainWindow" Height="600" Width="900" 
+        Loaded="Window_Loaded"
+        MouseMove="Window_MouseMove"
+        MouseLeftButtonUp="Window_MouseLeftButtonUp" WindowStartupLocation="CenterScreen">
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
             <MenuItem Header="New" Click="New_MenuItem_Click"/>
             <MenuItem Header="Save" Click="Save_MenuItem_Click"/>
             <MenuItem Header="Load" Click="Load_MenuItem_Click"/>
+            <MenuItem Header="Leaderboard " Click="Leaderboard_MenuItem_Click"/>
         </Menu>
-        <Canvas x:Name="canvas">
-            <Image x:Name="previewImage" 
-                   MouseLeftButtonUp="previewImage_MouseLeftButtonUp" 
-                   RenderOptions.BitmapScalingMode="HighQuality"/>
+        <Canvas Name="canvas" DockPanel.Dock="Left" Width="600">
 
         </Canvas>
-    </Grid>
+        <StackPanel DockPanel.Dock="Right" Margin="10">
+            <TextBlock Text="0:00:00" HorizontalAlignment="Center" FontSize="20" FontWeight="Bold"/>
+            <StackPanel>
+                <Image x:Name="previewImage" 
+                   MouseLeftButtonUp="previewImage_MouseLeftButtonUp" 
+                   RenderOptions.BitmapScalingMode="HighQuality" Width="270" Height="240"/>
 
+                <Button Name="Browserbtn" Content="Browser" Width="100" Height="50" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="20" Click="Browserbtn_Click">
+                    
+                </Button>
+            </StackPanel>
+            <StackPanel  Margin="50" >
+                <Button Width="40" Height="40" HorizontalAlignment="Center" Margin="2">
+                    <Image Source="/Images/up.png" Margin="5" RenderOptions.BitmapScalingMode="HighQuality" />
+                </Button>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Width="40" Height="40" Margin="2">
+                        <Image Source="/Images/left.png" Margin="5" RenderOptions.BitmapScalingMode="HighQuality" />
+                    </Button>
+                    <Button Width="40" Height="40" Margin="2">
+                        <Image Source="/Images/down.png" Margin="5" RenderOptions.BitmapScalingMode="HighQuality" />
+                    </Button>
+                    <Button Width="40" Height="40" Margin="2">
+                        <Image Source="/Images/right.png" Margin="5" RenderOptions.BitmapScalingMode="HighQuality" />
+                    </Button>
+                </StackPanel>
+                
+            </StackPanel>
+        </StackPanel>
+    </DockPanel>
 </Window>
