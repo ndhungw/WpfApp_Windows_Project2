@@ -37,6 +37,7 @@ namespace WpfApp_Windows_Project2
         const int width = 150;   //chiều rộng mỗi ô
         const int height = 150;  //chiều dài mỗi ô
 
+        Database database;
         public object Cavas { get; private set; }
 
         private void NewGameInit()
@@ -74,14 +75,7 @@ namespace WpfApp_Windows_Project2
 
             /*Tạo dữ liệu trò chơi*/
             //Tạo ma trận Rows x Cols
-            _a = new int[Rows, Cols];
-            for (int i = 0; i < Rows; i++)
-            {
-                for (int j = 0; j < Cols; j++)
-                {
-                    _a[i, j] = i * 3 + j;//0, 1, 2, ..., 8
-                }
-            }
+            database = new Database(Cols, Rows);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -107,9 +101,6 @@ namespace WpfApp_Windows_Project2
             int i = ((int)position.Y - startY) / height;
             int j = ((int)position.X - startX) / width;
 
-            this.Title = $"{position.X} - {position.Y}, a[{i}][{j}]";
-
-
             if (_isDragging)
             {
                 if (i < Rows && j < Cols)//kiểm tra điều kiện còn nằm trong vùng của thao tác kéo thả
@@ -119,8 +110,7 @@ namespace WpfApp_Windows_Project2
 
                     var lastLeft = Canvas.GetLeft(_selectedBitmap);
                     var lastTop = Canvas.GetTop(_selectedBitmap);
-                    Canvas.SetLeft(_selectedBitmap, lastLeft + dx);
-                    Canvas.SetTop(_selectedBitmap, lastTop + dy);
+                    UI.setLeftTopImage(_selectedBitmap, lastLeft + dx, lastTop + dy);
 
                     _lastPosition = position;
 
@@ -136,8 +126,7 @@ namespace WpfApp_Windows_Project2
             int x = (int)(position.X - startX) / (width + 2) * (width + 2) + startX;
             int y = (int)(position.Y - startY) / (height + 2) * (height + 2) + startY;
 
-            Canvas.SetLeft(_selectedBitmap, x);
-            Canvas.SetTop(_selectedBitmap, y);
+            UI.setLeftTopImage(_selectedBitmap, x, y);
 
             var image = sender as Image;
             var (i, j) = image.Tag as Tuple<int, int>;
@@ -185,7 +174,6 @@ namespace WpfApp_Windows_Project2
 
         private void New_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            /*Kiểm tra có dữ liệu mà chưa lưu hay không/
 
             /*Làm mới game*/
             canvas.Children.Clear();
@@ -196,73 +184,12 @@ namespace WpfApp_Windows_Project2
 
         private void Save_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            //const string SaveFileName = "save.txt";
-            //var writer = new StreamWriter(SaveFileName);
 
-            ////Lưu lượt đi hiện tại
-            //writer.WriteLine(isXTurn ? "X" : "O");
-
-            ////Lưu ma trận dữ liệu trò chơi
-            //for (int i = 0; i < Rows; i++)
-            //{
-            //    for (int j = 0; j < Cols; j++)
-            //    {
-            //        writer.Write(_a[i, j] + " ");
-            //    }
-            //    writer.WriteLine();
-            //}
-            //writer.Close();
-
-            //MessageBox.Show("Game is saved");
         }
 
         private void Load_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            //const string Seperator = " ";
-            //var screen = new OpenFileDialog();
 
-            //if (screen.ShowDialog() == true)
-            //{
-            //    var LoadFileName = screen.FileName;
-            //    StreamReader reader = new StreamReader(LoadFileName);
-            //    var firstLine = reader.ReadLine();
-
-            //    isXTurn = (firstLine == "X");
-
-            //    for (int rowIndex = 0; rowIndex < Rows; rowIndex++)
-            //    {
-            //        //string[] tokens = reader.ReadLine().Split(new string[] { Seperator }, StringSplitOptions.RemoveEmptyEntries);
-            //        string[] tokens = reader.ReadLine().Split(new string[] { Seperator }, StringSplitOptions.None);
-
-            //        //Model
-            //        for (int colIndex = 0; colIndex < Cols; colIndex++)
-            //        {
-            //            _a[rowIndex, colIndex] = int.Parse(tokens[colIndex]);
-            //            /* Vẽ X hoặc Y lên giao diện tại vị trí _a[i,j] */
-            //            if (_a[rowIndex, colIndex] != 0)
-            //            {
-            //                var imgMark = new Image();
-            //                imgMark.Width = width;
-            //                imgMark.Height = height;
-
-            //                if (_a[rowIndex, colIndex] == 1)//  Vị trí của X
-            //                {
-            //                    imgMark.Source = new BitmapImage(new Uri(imgXSource, UriKind.Relative));
-            //                }
-            //                else//  Vị trí của O
-            //                {
-            //                    imgMark.Source = new BitmapImage(new Uri(imgOSource, UriKind.Relative));
-            //                }
-
-            //                canvas.Children.Add(imgMark);
-            //                Canvas.SetLeft(imgMark, startX + colIndex * width);
-            //                Canvas.SetTop(imgMark, startY + rowIndex * height);
-            //            }
-            //        }
-            //    }
-            //    reader.Close();
-            //    MessageBox.Show("Game is loaded!");
-            //}
         }
 
         private void Browserbtn_Click(object sender, RoutedEventArgs e)
@@ -273,11 +200,8 @@ namespace WpfApp_Windows_Project2
             {
                 var ImgSource = new BitmapImage(
                     new Uri(screen.FileName, UriKind.Absolute));
-                Debug.WriteLine($"W: {ImgSource.Width} - H: {ImgSource.Height}");
 
                 previewImage.Source = ImgSource;
-                Canvas.SetLeft(previewImage, startX + Rows * width + startX);
-                Canvas.SetTop(previewImage, startY);
 
                 //Bắt đầu cắt thành 9 mảnh
                 for (int i = 0; i < 3; i++)
@@ -292,16 +216,9 @@ namespace WpfApp_Windows_Project2
                             var w = (int)ImgSource.Height / 3;//chiều rộng của 1 ô
                             var rect = new Int32Rect(j * w, i * h, w, h);//tạo khung
 
-                            //cắt hình đưa vào khung
-                            var cropBitmap = new CroppedBitmap(ImgSource, rect);
-                            var cropImage = new Image();
-                            cropImage.Stretch = Stretch.Fill;
-                            cropImage.Width = width;
-                            cropImage.Height = height;
-                            cropImage.Source = cropBitmap;
+                            var cropImage = Business.CropImage(ImgSource, rect, width, height);
                             canvas.Children.Add(cropImage);
-                            Canvas.SetLeft(cropImage, startX + j * (width + 2));
-                            Canvas.SetTop(cropImage, startY + i * (height + 2));
+                            UI.setLeftTopImage(cropImage, startX + j * (width + 2), startY + i * (height + 2));
 
                             //Events
                             cropImage.MouseLeftButtonDown += CropImage_MouseLeftButtonDown;
@@ -314,6 +231,26 @@ namespace WpfApp_Windows_Project2
         }
 
         private void Leaderboard_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void topbtn_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void leftbtn_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void downbtn_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void rightbtn_Click(object sender, RoutedEventArgs e)
         {
 
         }
