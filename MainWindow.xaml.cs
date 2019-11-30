@@ -34,8 +34,8 @@ namespace WpfApp_Windows_Project2
         int[,] _a;  //Mảng dữ liệu
         const int startX = 30;  //vị trí bắt đầu vẽ theo trục X
         const int startY = 30;  //vị trí bắt đầu vẽ theo trục Y
-        const int width = 100;   //chiều rộng mỗi ô
-        const int height = 100;  //chiều dài mỗi ô
+        const int width = 150;   //chiều rộng mỗi ô
+        const int height = 150;  //chiều dài mỗi ô
 
         public object Cavas { get; private set; }
 
@@ -88,51 +88,6 @@ namespace WpfApp_Windows_Project2
         {
             NewGameInit();
 
-            var screen = new OpenFileDialog();
-
-            if(screen.ShowDialog() == true)
-            {
-                var ImgSource = new BitmapImage(
-                    new Uri(screen.FileName, UriKind.Absolute));
-                Debug.WriteLine($"W: {ImgSource.Width} - H: {ImgSource.Height}");
-                previewImage.Width = 300;
-                previewImage.Height = 240;
-                previewImage.Source = ImgSource;
-                Canvas.SetLeft(previewImage, startX + Rows * width + startX);
-                Canvas.SetTop(previewImage, startY);
-
-                //Bắt đầu cắt thành 9 mảnh
-                for (int i = 0; i < 3; i++)
-                {
-                    for (int j = 0; j < 3; j++)
-                    {
-                        //Tạo mảnh, có 9 mảnh, trừ ô [i,j] = [2,2]
-                        if (!(i == 2 && j == 2))
-                        {
-                            //xử lí tạm thời, chỉ cắt sao cho ra vuông 3x3 (lấy phần bên trái)
-                            var h = (int)ImgSource.Height / 3;//chiều cao của 1 ô
-                            var w = (int)ImgSource.Height / 3;//chiều rộng của 1 ô
-                            var rect = new Int32Rect(j * w, i * h, w, h);//tạo khung
-
-                            //cắt hình đưa vào khung
-                            var cropBitmap = new CroppedBitmap(ImgSource, rect);
-                            var cropImage = new Image();
-                            cropImage.Stretch = Stretch.Fill;
-                            cropImage.Width = width;
-                            cropImage.Height = height;
-                            cropImage.Source = cropBitmap;
-                            canvas.Children.Add(cropImage);
-                            Canvas.SetLeft(cropImage, startX + j * (width + 2));
-                            Canvas.SetTop(cropImage, startY + i * (height + 2));
-
-                            //Events
-                            cropImage.MouseLeftButtonDown += CropImage_MouseLeftButtonDown;
-                            cropImage.PreviewMouseLeftButtonUp += CropImage_PreviewMouseLeftButtonUp;
-                            cropImage.Tag = new Tuple<int, int>(i, j);
-                        }
-                    }
-                }
-            }
         }
 
         bool _isDragging = false;
@@ -310,5 +265,57 @@ namespace WpfApp_Windows_Project2
             //}
         }
 
+        private void Browserbtn_Click(object sender, RoutedEventArgs e)
+        {
+            var screen = new OpenFileDialog();
+
+            if (screen.ShowDialog() == true)
+            {
+                var ImgSource = new BitmapImage(
+                    new Uri(screen.FileName, UriKind.Absolute));
+                Debug.WriteLine($"W: {ImgSource.Width} - H: {ImgSource.Height}");
+
+                previewImage.Source = ImgSource;
+                Canvas.SetLeft(previewImage, startX + Rows * width + startX);
+                Canvas.SetTop(previewImage, startY);
+
+                //Bắt đầu cắt thành 9 mảnh
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        //Tạo mảnh, có 9 mảnh, trừ ô [i,j] = [2,2]
+                        if (!(i == 2 && j == 2))
+                        {
+                            //xử lí tạm thời, chỉ cắt sao cho ra vuông 3x3 (lấy phần bên trái)
+                            var h = (int)ImgSource.Height / 3;//chiều cao của 1 ô
+                            var w = (int)ImgSource.Height / 3;//chiều rộng của 1 ô
+                            var rect = new Int32Rect(j * w, i * h, w, h);//tạo khung
+
+                            //cắt hình đưa vào khung
+                            var cropBitmap = new CroppedBitmap(ImgSource, rect);
+                            var cropImage = new Image();
+                            cropImage.Stretch = Stretch.Fill;
+                            cropImage.Width = width;
+                            cropImage.Height = height;
+                            cropImage.Source = cropBitmap;
+                            canvas.Children.Add(cropImage);
+                            Canvas.SetLeft(cropImage, startX + j * (width + 2));
+                            Canvas.SetTop(cropImage, startY + i * (height + 2));
+
+                            //Events
+                            cropImage.MouseLeftButtonDown += CropImage_MouseLeftButtonDown;
+                            cropImage.PreviewMouseLeftButtonUp += CropImage_PreviewMouseLeftButtonUp;
+                            cropImage.Tag = new Tuple<int, int>(i, j);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void Leaderboard_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
