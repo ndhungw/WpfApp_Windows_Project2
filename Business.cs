@@ -25,7 +25,6 @@ namespace WpfApp_Windows_Project2
             return cropImage;
         }
 
-      
-
+        
     }
 }

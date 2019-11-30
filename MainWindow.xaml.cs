@@ -38,41 +38,9 @@ namespace WpfApp_Windows_Project2
         const int height = 150;  //chiều dài mỗi ô
 
         Database database;
-        public object Cavas { get; private set; }
 
         private void NewGameInit()
         {
-            ////Tạo giao diện
-            ////Vẽ đường dọc
-            //for (int i = 1; i < Rows; i++)
-            //{
-            //    var verticalLine = new Line();
-            //    verticalLine.StrokeThickness = 1;
-            //    verticalLine.Stroke = new SolidColorBrush(Colors.Black);
-            //    canvas.Children.Add(verticalLine);
-
-            //    verticalLine.X1 = startX + i * width;
-            //    verticalLine.X2 = startX + i * width;
-
-            //    verticalLine.Y1 = startY;
-            //    verticalLine.Y2 = startY + Rows * height;
-            //}
-
-            ////Vẽ đường ngang
-            //for (int i = 1; i < Cols; i++)
-            //{
-            //    var horizontalLine = new Line();
-            //    horizontalLine.StrokeThickness = 1;
-            //    horizontalLine.Stroke = new SolidColorBrush(Colors.Black);
-            //    canvas.Children.Add(horizontalLine);
-
-            //    horizontalLine.X1 = startX;
-            //    horizontalLine.X2 = startX + Cols * width;
-
-            //    horizontalLine.Y1 = startY + i * height;
-            //    horizontalLine.Y2 = startY + i * height;
-            //}
-
             /*Tạo dữ liệu trò chơi*/
             //Tạo ma trận Rows x Cols
             database = new Database(Cols, Rows);
@@ -81,10 +49,9 @@ namespace WpfApp_Windows_Project2
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             NewGameInit();
-
         }
 
-        bool _isDragging = false;
+        static bool _isDragging = false;
         Image _selectedBitmap = null;
         Point _lastPosition;
 
@@ -131,7 +98,7 @@ namespace WpfApp_Windows_Project2
             var image = sender as Image;
             var (i, j) = image.Tag as Tuple<int, int>;
 
-            MessageBox.Show($"{i} - {j}");
+            //MessageBox.Show($"{i} - {j}");
         }
 
         private void Window_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -142,32 +109,22 @@ namespace WpfApp_Windows_Project2
             //int j = ((int)position.X - startX) / width;
 
             //this.Title = $"{position.X} - {position.Y}, a[{i}][{j}]";
-
-            //var img = new Image();
-            //img.Width = 30;
-            //img.Height = 30;
-            //img.Source = new BitmapImage(
-            //    new Uri("circle.png", UriKind.Relative));
-            //canvas.Children.Add(img);
-
-            //Canvas.SetLeft(img, startX + j * width);
-            //Canvas.SetTop(img, startY + i * height);
         }
 
         private void previewImage_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            var animation = new DoubleAnimation();
-            animation.From = 200;
-            animation.To = 300;
-            animation.Duration = new Duration(TimeSpan.FromSeconds(1));
-            animation.AutoReverse = true;
-            animation.RepeatBehavior = RepeatBehavior.Forever;
+            //var animation = new DoubleAnimation();
+            //animation.From = 200;
+            //animation.To = 300;
+            //animation.Duration = new Duration(TimeSpan.FromSeconds(1));
+            //animation.AutoReverse = true;
+            //animation.RepeatBehavior = RepeatBehavior.Forever;
 
-            var story = new Storyboard();
-            story.Children.Add(animation);
-            Storyboard.SetTargetName(animation, previewImage.Name);
-            Storyboard.SetTargetProperty(animation, new PropertyPath(Canvas.LeftProperty));
-            story.Begin(this);
+            //var story = new Storyboard();
+            //story.Children.Add(animation);
+            //Storyboard.SetTargetName(animation, previewImage.Name);
+            //Storyboard.SetTargetProperty(animation, new PropertyPath(Canvas.LeftProperty));
+            //story.Begin(this);
         }
 
 
