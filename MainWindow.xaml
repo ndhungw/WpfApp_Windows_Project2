@@ -5,8 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp_Windows_Project2"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded">
     <Grid>
-        
+        <Menu>
+            <MenuItem Header="New" Click="New_MenuItem_Click"/>
+            <MenuItem Header="Save" Click="Save_MenuItem_Click"/>
+            <MenuItem Header="Load" Click="Load_MenuItem_Click"/>
+        </Menu>
+        <Canvas x:Name="canvas">
+            <Image x:Name="previewImage" 
+                   MouseLeftButtonUp="previewImage_MouseLeftButtonUp" 
+                   RenderOptions.BitmapScalingMode="HighQuality"/>
+
+        </Canvas>
     </Grid>
+
 </Window>
