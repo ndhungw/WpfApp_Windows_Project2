@@ -36,38 +36,40 @@ namespace WpfApp_Windows_Project2
         const int width = 100;   //chiều rộng mỗi ô
         const int height = 100;  //chiều dài mỗi ô
 
+        public object Cavas { get; private set; }
+
         private void NewGameInit()
         {
-            //Tạo giao diện
-            //Vẽ đường dọc
-            for (int i = 1; i < Rows; i++)
-            {
-                var verticalLine = new Line();
-                verticalLine.StrokeThickness = 1;
-                verticalLine.Stroke = new SolidColorBrush(Colors.Black);
-                canvas.Children.Add(verticalLine);
+            ////Tạo giao diện
+            ////Vẽ đường dọc
+            //for (int i = 1; i < Rows; i++)
+            //{
+            //    var verticalLine = new Line();
+            //    verticalLine.StrokeThickness = 1;
+            //    verticalLine.Stroke = new SolidColorBrush(Colors.Black);
+            //    canvas.Children.Add(verticalLine);
 
-                verticalLine.X1 = startX + i * width;
-                verticalLine.X2 = startX + i * width;
+            //    verticalLine.X1 = startX + i * width;
+            //    verticalLine.X2 = startX + i * width;
 
-                verticalLine.Y1 = startY;
-                verticalLine.Y2 = startY + Rows * height;
-            }
+            //    verticalLine.Y1 = startY;
+            //    verticalLine.Y2 = startY + Rows * height;
+            //}
 
-            //Vẽ đường ngang
-            for (int i = 1; i < Cols; i++)
-            {
-                var horizontalLine = new Line();
-                horizontalLine.StrokeThickness = 1;
-                horizontalLine.Stroke = new SolidColorBrush(Colors.Black);
-                canvas.Children.Add(horizontalLine);
+            ////Vẽ đường ngang
+            //for (int i = 1; i < Cols; i++)
+            //{
+            //    var horizontalLine = new Line();
+            //    horizontalLine.StrokeThickness = 1;
+            //    horizontalLine.Stroke = new SolidColorBrush(Colors.Black);
+            //    canvas.Children.Add(horizontalLine);
 
-                horizontalLine.X1 = startX;
-                horizontalLine.X2 = startX + Cols * width;
+            //    horizontalLine.X1 = startX;
+            //    horizontalLine.X2 = startX + Cols * width;
 
-                horizontalLine.Y1 = startY + i * height;
-                horizontalLine.Y2 = startY + i * height;
-            }
+            //    horizontalLine.Y1 = startY + i * height;
+            //    horizontalLine.Y2 = startY + i * height;
+            //}
 
             /*Tạo dữ liệu trò chơi*/
             //Tạo ma trận Rows x Cols
@@ -97,9 +99,34 @@ namespace WpfApp_Windows_Project2
                 previewImage.Source = ImgSource;
                 Canvas.SetLeft(previewImage, startX + Rows * width + startX);
                 Canvas.SetTop(previewImage, startY);
-            }
 
-            
+                //Bắt đầu cắt thành 9 mảnh
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        //Tạo mảnh, có 9 mảnh, trừ ô [i,j] = [2,2]
+                        if (!(i == 2 && j == 2))
+                        {
+                            //xử lí tạm thời, chỉ cắt sao cho ra vuông 3x3 (lấy phần bên trái)
+                            var h = (int)ImgSource.Height / 3;//chiều cao của 1 ô
+                            var w = (int)ImgSource.Height / 3;//chiều rộng của 1 ô
+                            var rect = new Int32Rect(j * w, i * h, w, h);//tạo khung
+                            var cropBitmap = new CroppedBitmap(ImgSource, rect);//cắt hình đưa vào khung
+                            var cropImage = new Image();
+                            cropImage.Stretch = Stretch.Fill;
+                            cropImage.Width = width;
+                            cropImage.Height = height;
+                            cropImage.Source = cropBitmap;
+                            canvas.Children.Add(cropImage);
+                            Canvas.SetLeft(cropImage, startX + j * (width + 5));
+                            Canvas.SetTop(cropImage, startY + i * (height + 5));
+
+
+                        }
+                    }
+                }
+            }
         }
 
         private void New_MenuItem_Click(object sender, RoutedEventArgs e)
