@@ -11,7 +11,7 @@
         MouseLeftButtonUp="Window_MouseLeftButtonUp" WindowStartupLocation="CenterScreen">
     <DockPanel>
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="New" Click="New_MenuItem_Click"/>
+            <MenuItem Header="Shuffle" Click="New_MenuItem_Click"/>
             <MenuItem Header="Save" Click="Save_MenuItem_Click"/>
             <MenuItem Header="Load" Click="Load_MenuItem_Click"/>
             <MenuItem Header="Leaderboard " Click="Leaderboard_MenuItem_Click"/>
@@ -31,17 +31,17 @@
                 </Button>
             </StackPanel>
             <StackPanel  Margin="50" >
-                <Button Width="40" Height="40" HorizontalAlignment="Center" Margin="2">
+                <Button Name="Up_Btn" Width="40" Height="40" HorizontalAlignment="Center" Margin="2" Click="Up_Btn_Click">
                     <Image Source="/Images/up.png" Margin="5" RenderOptions.BitmapScalingMode="HighQuality" />
                 </Button>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button Width="40" Height="40" Margin="2">
+                    <Button Name="Left_Btn" Width="40" Height="40" Margin="2" Click="Left_Btn_Click">
                         <Image Source="/Images/left.png" Margin="5" RenderOptions.BitmapScalingMode="HighQuality" />
                     </Button>
-                    <Button Width="40" Height="40" Margin="2">
+                    <Button Name="Down_Btn" Width="40" Height="40" Margin="2" Click="Down_Btn_Click">
                         <Image Source="/Images/down.png" Margin="5" RenderOptions.BitmapScalingMode="HighQuality" />
                     </Button>
-                    <Button Width="40" Height="40" Margin="2">
+                    <Button Name="Right_Btn" Width="40" Height="40" Margin="2" Click="Right_Btn_Click">
                         <Image Source="/Images/right.png" Margin="5" RenderOptions.BitmapScalingMode="HighQuality" />
                     </Button>
                 </StackPanel>

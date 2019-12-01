@@ -30,58 +30,15 @@ namespace WpfApp_Windows_Project2
 
         const int Rows = 3; //số dòng mặc định
         const int Cols = 3; //số cột mặc định
-
-        int[,] _a;  //Mảng dữ liệu
         const int startX = 30;  //vị trí bắt đầu vẽ theo trục X
         const int startY = 30;  //vị trí bắt đầu vẽ theo trục Y
         const int width = 150;   //chiều rộng mỗi ô
         const int height = 150;  //chiều dài mỗi ô
-
-        Database database;
-        public object Cavas { get; private set; }
-
-        private void NewGameInit()
-        {
-            ////Tạo giao diện
-            ////Vẽ đường dọc
-            //for (int i = 1; i < Rows; i++)
-            //{
-            //    var verticalLine = new Line();
-            //    verticalLine.StrokeThickness = 1;
-            //    verticalLine.Stroke = new SolidColorBrush(Colors.Black);
-            //    canvas.Children.Add(verticalLine);
-
-            //    verticalLine.X1 = startX + i * width;
-            //    verticalLine.X2 = startX + i * width;
-
-            //    verticalLine.Y1 = startY;
-            //    verticalLine.Y2 = startY + Rows * height;
-            //}
-
-            ////Vẽ đường ngang
-            //for (int i = 1; i < Cols; i++)
-            //{
-            //    var horizontalLine = new Line();
-            //    horizontalLine.StrokeThickness = 1;
-            //    horizontalLine.Stroke = new SolidColorBrush(Colors.Black);
-            //    canvas.Children.Add(horizontalLine);
-
-            //    horizontalLine.X1 = startX;
-            //    horizontalLine.X2 = startX + Cols * width;
-
-            //    horizontalLine.Y1 = startY + i * height;
-            //    horizontalLine.Y2 = startY + i * height;
-            //}
-
-            /*Tạo dữ liệu trò chơi*/
-            //Tạo ma trận Rows x Cols
-            database = new Database(Cols, Rows);
-        }
-
+        
+        
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            NewGameInit();
-
+            Business.InitComponents(ref canvas,Rows,Cols);
         }
 
         bool _isDragging = false;
@@ -129,9 +86,9 @@ namespace WpfApp_Windows_Project2
             UI.setLeftTopImage(_selectedBitmap, x, y);
 
             var image = sender as Image;
-            var (i, j) = image.Tag as Tuple<int, int>;
+            var tuple = image.Tag as Tuple<int, int>;
 
-            MessageBox.Show($"{i} - {j}");
+            MessageBox.Show($"{tuple.Item1} - {tuple.Item2}");
         }
 
         private void Window_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -176,10 +133,8 @@ namespace WpfApp_Windows_Project2
         {
 
             /*Làm mới game*/
-            canvas.Children.Clear();
-            NewGameInit();
-
-            MessageBox.Show("New game");
+            Business.StartNewGame(Rows, Cols);
+            
         }
 
         private void Save_MenuItem_Click(object sender, RoutedEventArgs e)
@@ -198,11 +153,13 @@ namespace WpfApp_Windows_Project2
 
             if (screen.ShowDialog() == true)
             {
+                UI.ClearBoard();
                 var ImgSource = new BitmapImage(
                     new Uri(screen.FileName, UriKind.Absolute));
 
                 previewImage.Source = ImgSource;
 
+                Image[,] images = new Image[Rows, Cols];
                 //Bắt đầu cắt thành 9 mảnh
                 for (int i = 0; i < 3; i++)
                 {
@@ -224,9 +181,25 @@ namespace WpfApp_Windows_Project2
                             cropImage.MouseLeftButtonDown += CropImage_MouseLeftButtonDown;
                             cropImage.PreviewMouseLeftButtonUp += CropImage_PreviewMouseLeftButtonUp;
                             cropImage.Tag = new Tuple<int, int>(i, j);
+
+                            images[i, j] = cropImage;
+                        }
+                        else
+                        {
+                            var cropImage = new Image();
+                            cropImage.Width = width;
+                            cropImage.Height = height;
+                            cropImage.Source = null;
+                            canvas.Children.Add(cropImage);
+                            UI.setLeftTopImage(cropImage, startX + j * (width + 2), startY + i * (height + 2));
+                            cropImage.Tag = new Tuple<int, int>(i, j);
+
+                            images[i, j] = cropImage;
                         }
                     }
                 }
+                UI.SetImages(ref images);
+                Business.StartNewGame(Rows,Cols);
             }
         }
 
@@ -235,24 +208,24 @@ namespace WpfApp_Windows_Project2
 
         }
 
-        private void topbtn_Click(object sender, RoutedEventArgs e)
+        private void Up_Btn_Click(object sender, RoutedEventArgs e)
         {
-
+            Business.DirectionalMovement(3);
         }
 
-        private void leftbtn_Click(object sender, RoutedEventArgs e)
+        private void Left_Btn_Click(object sender, RoutedEventArgs e)
         {
-
+            Business.DirectionalMovement(1);
         }
 
-        private void downbtn_Click(object sender, RoutedEventArgs e)
+        private void Down_Btn_Click(object sender, RoutedEventArgs e)
         {
-
+            Business.DirectionalMovement(4);
         }
 
-        private void rightbtn_Click(object sender, RoutedEventArgs e)
+        private void Right_Btn_Click(object sender, RoutedEventArgs e)
         {
-
+            Business.DirectionalMovement(2);
         }
     }
 }
