@@ -3,25 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace WpfApp_Windows_Project2
 {
-    public class Database
+    public static class Database
     {
-        static private int[,] _a; 
-        
-        public Database(int Cols, int Rows)
-        {
-            _a = new int[Rows, Cols];
+        public static int[,] _a;
+        public static Image[,] _images;
+        public static int rows;
+        public static int cols;
 
-            for (int i = 0; i < Rows; i++)
-            {
-                for (int j = 0; j < Cols; j++)
-                {
-                    _a[i, j] = i * 3 + j;//0, 1, 2, ..., 8
-                }
-            }
-        }
 
     }
 }
