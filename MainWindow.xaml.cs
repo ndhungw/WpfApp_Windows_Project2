@@ -37,7 +37,6 @@ namespace WpfApp_Windows_Project2
         const int width = 150;   //chiều rộng mỗi ô
         const int height = 150;  //chiều dài mỗi ô
 
-        Database database;
         public object Cavas { get; private set; }
 
         private void NewGameInit()
@@ -75,7 +74,10 @@ namespace WpfApp_Windows_Project2
 
             /*Tạo dữ liệu trò chơi*/
             //Tạo ma trận Rows x Cols
-            database = new Database(Cols, Rows);
+            Database.rows = Rows;
+            Database.cols = Cols;
+            Database._a = new int[Rows, Cols];
+            Database._images = new Image[Rows, Cols];
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -86,20 +88,37 @@ namespace WpfApp_Windows_Project2
 
         bool _isDragging = false;
         Image _selectedBitmap = null;
+        Tuple<int, int> _oldIndexSelectedBitmap = null;
+        Tuple<double, double> _distance = null;
         Point _lastPosition;
+        int count = 0;
 
         private void CropImage_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            count++;
+            if(count == 2)
+            {
+                UI.setLeftTopImage(_selectedBitmap, _oldIndexSelectedBitmap.Item2 * (width + 2) + startX, _oldIndexSelectedBitmap.Item1 * (height + 2) + startY);
+                _isDragging = false;
+            }
+
+            var position = e.GetPosition(this);
+            int i = ((int)position.Y - startY) / ( height + 2 );
+            int j = ((int)position.X - startX) / ( width + 2 );
+
             _isDragging = true;
             _selectedBitmap = sender as Image;
+            _oldIndexSelectedBitmap = new Tuple<int, int>(i, j);
+
+            _distance = new Tuple<double, double>(position.Y - (i * width + startY), position.X - (j * height + startX));
             _lastPosition = e.GetPosition(this);//vị trước khi được kéo đi nơi khác
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
         {
             var position = e.GetPosition(this);
-            int i = ((int)position.Y - startY) / height;
-            int j = ((int)position.X - startX) / width;
+            int i = ((int)position.Y - startY) / ( height + 2 );
+            int j = ((int)position.X - startX) / ( width + 2 );
 
             if (_isDragging)
             {
@@ -113,20 +132,43 @@ namespace WpfApp_Windows_Project2
                     UI.setLeftTopImage(_selectedBitmap, lastLeft + dx, lastTop + dy);
 
                     _lastPosition = position;
-
                 }
+                else
+                {
+                    //if (position.Y - (_lastPosition.Y - _distance.Item1) > height || position.X - (_lastPosition.X - _distance.Item2) > width)
+                    //{
+                    //    UI.setLeftTopImage(_selectedBitmap, _oldIndexSelectedBitmap.Item2 * (width + 2) + startX, _oldIndexSelectedBitmap.Item1 * (height + 2) + startY);
+                    //    _isDragging = false;
+                    //}
+                        
+                }
+                Title = "Dang keo";
             }
+
         }
 
         private void CropImage_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
+            count = 0;
             _isDragging = false;
             var position = e.GetPosition(this);
+       
+            Point currentIndex = new Point();
+            currentIndex.X = (int)(position.Y - startY) / (height + 2);
+            currentIndex.Y = (int)(position.X - startX) / (width + 2);
 
-            int x = (int)(position.X - startX) / (width + 2) * (width + 2) + startX;
-            int y = (int)(position.Y - startY) / (height + 2) * (height + 2) + startY;
+            if (currentIndex.X < Rows && currentIndex.Y < Cols && Database._a[(int)currentIndex.X, (int)currentIndex.Y] == 0 && Business.checkLegallyMoving((int)currentIndex.X, (int)currentIndex.Y, _oldIndexSelectedBitmap.Item1, _oldIndexSelectedBitmap.Item2)) 
+            {
+                int left = (int)currentIndex.Y * (width + 2) + startX;
+                int top = (int)currentIndex.X * (height + 2) + startY;
 
-            UI.setLeftTopImage(_selectedBitmap, x, y);
+                UI.setLeftTopImage(_selectedBitmap, left, top);
+                Business.changeIndex((int)currentIndex.X, (int)currentIndex.Y, _oldIndexSelectedBitmap.Item1, _oldIndexSelectedBitmap.Item2);
+            }
+            else
+            {
+                UI.setLeftTopImage(_selectedBitmap, _oldIndexSelectedBitmap.Item2 * (width +2) + startX, _oldIndexSelectedBitmap.Item1 * (height + 2) + startY);
+            }
 
             var image = sender as Image;
             var (i, j) = image.Tag as Tuple<int, int>;
@@ -224,6 +266,9 @@ namespace WpfApp_Windows_Project2
                             cropImage.MouseLeftButtonDown += CropImage_MouseLeftButtonDown;
                             cropImage.PreviewMouseLeftButtonUp += CropImage_PreviewMouseLeftButtonUp;
                             cropImage.Tag = new Tuple<int, int>(i, j);
+
+                            Database._images[i, j] = cropImage;
+                            Database._a[i, j] = 1;
                         }
                     }
                 }
@@ -237,22 +282,59 @@ namespace WpfApp_Windows_Project2
 
         private void topbtn_Click(object sender, RoutedEventArgs e)
         {
+            Point emptyIndex = Business.getEmptyIndex();
+
+            if ((int)(emptyIndex.X) + 1 >= Rows)
+                return;
+
+            var left = (int)emptyIndex.Y * (width + 2) + startX;
+            var top = (int)emptyIndex.X * (height + 2) + startY;
+
+            UI.setLeftTopImage(Database._images[(int)(emptyIndex.X) + 1, (int)(emptyIndex.Y) ], left, top);
+            Business.changeIndex((int)(emptyIndex.X), (int)(emptyIndex.Y), (int)(emptyIndex.X) + 1, (int)(emptyIndex.Y) );
 
         }
 
         private void leftbtn_Click(object sender, RoutedEventArgs e)
         {
+            Point emptyIndex = Business.getEmptyIndex();
 
+            if ((int)(emptyIndex.Y) + 1 >= Cols)
+                return;
+
+            var left = (int)emptyIndex.Y * (width + 2) + startX;
+            var top = (int)emptyIndex.X * (height + 2) + startY;
+
+            UI.setLeftTopImage(Database._images[(int)(emptyIndex.X), (int)(emptyIndex.Y) + 1], left, top);
+            Business.changeIndex((int)(emptyIndex.X), (int)(emptyIndex.Y), (int)(emptyIndex.X), (int)(emptyIndex.Y) + 1);
         }
 
         private void downbtn_Click(object sender, RoutedEventArgs e)
         {
+            Point emptyIndex = Business.getEmptyIndex();
 
+            if ((int)(emptyIndex.X) - 1 < 0)
+                return;
+
+            var left = (int)emptyIndex.Y * (width + 2) + startX;
+            var top = (int)emptyIndex.X * (height + 2) + startY;
+
+            UI.setLeftTopImage(Database._images[(int)(emptyIndex.X) - 1, (int)(emptyIndex.Y)], left, top);
+            Business.changeIndex((int)(emptyIndex.X), (int)(emptyIndex.Y), (int)(emptyIndex.X) - 1, (int)(emptyIndex.Y));
         }
 
         private void rightbtn_Click(object sender, RoutedEventArgs e)
         {
+            Point emptyIndex = Business.getEmptyIndex();
 
+            if ((int)(emptyIndex.Y) - 1 < 0)
+                return;
+
+            var left = (int)emptyIndex.Y * (width + 2) + startX;
+            var top = (int)emptyIndex.X * (height + 2) + startY;
+
+            UI.setLeftTopImage(Database._images[(int)(emptyIndex.X), (int)(emptyIndex.Y) - 1], left, top);
+            Business.changeIndex((int)(emptyIndex.X), (int)(emptyIndex.Y), (int)(emptyIndex.X), (int)(emptyIndex.Y) - 1);
         }
     }
 }
