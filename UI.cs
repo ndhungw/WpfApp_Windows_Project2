@@ -4,12 +4,35 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 
 namespace WpfApp_Windows_Project2
 {
     public static class UI
     {
+        const int startX = 30;  //vị trí bắt đầu vẽ theo trục X
+        const int startY = 30;  //vị trí bắt đầu vẽ theo trục Y
+        const int width = 150;   //chiều rộng mỗi ô
+        const int height = 150;  //chiều dài mỗi ô
+        const int margin = 2;
+
+
+        private static Canvas canvas;
+        private static Image[,] images;
+
+        /// <summary>
+        /// Khoi dong UI
+        /// </summary>
+        /// <param name="cv">Canvas</param>
+        /// <param name="Rows">So dong</param>
+        /// <param name="Cols">So cot</param>
+        public static void Start(ref Canvas cv,int Rows,int Cols)
+        {
+            canvas = cv;
+            images = new Image[Rows, Cols];
+        }
         public static void setLeftTopImage(Image _selectedBitmap, double left, double top)
         {
             try
@@ -25,5 +48,65 @@ namespace WpfApp_Windows_Project2
             }
         }
 
+        /// <summary>
+        /// Truyen ma tran Image vao cho class UI
+        /// </summary>
+        /// <param name="imgs">ma tran Image</param>
+        public static void SetImages(ref Image[,] imgs)
+        {
+            images = imgs;
+        }
+
+        /// <summary>
+        /// Clear canvas
+        /// </summary>
+        public static void ClearBoard()
+        {
+            canvas.Children.Clear();
+        }
+        /// <summary>
+        /// Doi cho 2 Image
+        /// </summary>
+        /// <param name="point1">Vi tri cua image thu 1 trong ma tran image</param>
+        /// <param name="point2">Vi tri cua image thu 2 trong ma tran image</param>
+        public static void SwapPosition(Tuple<int, int> point1, Tuple<int, int> point2)
+        {
+            try
+            {
+                double X1 = startX + point1.Item2 * (width + margin);
+                double Y1 = startY + point1.Item1 * (height + margin);
+                double X2 = startX + point2.Item2 * (width + margin);
+                double Y2 = startY + point2.Item1 * (height + margin);
+                Canvas.SetLeft(images[point1.Item1, point1.Item2], X2);
+                Canvas.SetTop(images[point1.Item1, point1.Item2], Y2);
+                Canvas.SetLeft(images[point2.Item1, point2.Item2], X1);
+                Canvas.SetTop(images[point2.Item1, point2.Item2], Y1);
+                Image temp = images[point1.Item1, point1.Item2];
+                images[point1.Item1, point1.Item2] = images[point2.Item1, point2.Item2];
+                images[point2.Item1, point2.Item2] = temp;
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Chuyen cac image trong ma tran ve dung vi tri
+        /// </summary>
+        public static void ResetBoard()
+        {
+            for (int i = 0; i < images.GetLength(0); i++)
+                for (int j = 0; j < images.GetLength(1); j++)
+                {
+                    Tuple<int,int> tag=images[i,j].Tag as Tuple<int,int>;
+                    UI.SwapPosition(tag, new Tuple<int, int>(i, j));
+                    if (i == tag.Item1 && j == tag.Item2) continue;
+                    else
+                    {
+                        j--;
+                    }
+                }
+        }
     }
 }
