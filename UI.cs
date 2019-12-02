@@ -18,10 +18,10 @@ namespace WpfApp_Windows_Project2
         const int height = 150;  //chiều dài mỗi ô
         const int margin = 2;
 
-
+        public static bool isEmpty = true;
         private static Canvas canvas;
         private static Image[,] images;
-
+        private static string currentImageLink;
         /// <summary>
         /// Khoi dong UI
         /// </summary>
@@ -49,12 +49,24 @@ namespace WpfApp_Windows_Project2
         }
 
         /// <summary>
-        /// Truyen ma tran Image vao cho class UI
+        /// Load hinh len UI
         /// </summary>
         /// <param name="imgs">ma tran Image</param>
-        public static void SetImages(ref Image[,] imgs)
+        public static void SetBoard(ref Image[,] imgs,string link)
         {
             images = imgs;
+            currentImageLink = link;
+            isEmpty = link.CompareTo("") == 0;
+        }
+        
+
+        /// <summary>
+        /// Lay link hinh anh goc
+        /// </summary>
+        /// <returns>link hinh</returns>
+        public static string GetImage()
+        {
+            return currentImageLink;
         }
 
         /// <summary>
@@ -107,6 +119,81 @@ namespace WpfApp_Windows_Project2
                         j--;
                     }
                 }
+        }
+
+        /// <summary>
+        /// Load game o phia giao dien
+        /// </summary>
+        /// <param name="link">link hinh anh goc</param>
+        /// <param name="matrix">ma tran du lieu</param>
+        public static void LoadGame(string link,int[,] matrix)
+        {
+            UI.ResetBoard();
+            UI.ApplyImage(link);
+            UI.isEmpty = false;
+            UI.currentImageLink = link;
+            for (int i = 0; i < images.GetLength(0); i++)
+                for (int j = 0; j < images.GetLength(1); j++)
+                {
+                    Tuple<int, int> tag = new Tuple<int, int>(matrix[i, j] / 3, matrix[i, j] % 3);
+                    bool found = false;
+                    for(int m=0;m< images.GetLength(0); m++)
+                    {
+                        for (int n = 0; n < images.GetLength(1); n++)
+                        {
+                            if ((images[m, n].Tag as Tuple<int, int>).Item1 == tag.Item1 &&
+                                (images[m, n].Tag as Tuple<int, int>).Item2 == tag.Item2)
+                            {
+                                tag = new Tuple<int, int>(m,n);
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (found) break;
+                    }
+                        
+                    UI.SwapPosition(tag, new Tuple<int, int>(i, j));
+                    
+                }
+        }
+
+
+
+        //------------------Cac ham phu, tro giup cho cac ham chinh
+        //--------Luu y: Do cac ham phu chi duoc su dung trong class nay 
+        //--------nen de private de khong bi nham lan voi cac ham chinh khi class Database duoc goi o cac class khac
+
+
+
+        
+        /// <summary>
+        /// Truyen vao link hinh anh goc, ham se cat hinh va phan phoi hinh vao giao dien
+        /// </summary>
+        /// <param name="link">link hinh anh goc</param>
+        private static void ApplyImage(string link)
+        {
+            var ImgSource = new BitmapImage(
+                    new Uri(link, UriKind.Absolute));
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    //Tạo mảnh, có 9 mảnh, trừ ô [i,j] = [2,2]
+                    if (!(i == 2 && j == 2))
+                    {
+                        //xử lí tạm thời, chỉ cắt sao cho ra vuông 3x3 (lấy phần bên trái)
+                        var h = (int)ImgSource.Height / 3;//chiều cao của 1 ô
+                        var w = (int)ImgSource.Height / 3;//chiều rộng của 1 ô
+                        var rect = new Int32Rect(j * w, i * h, w, h);//tạo khung
+                        var cropBitmap = new CroppedBitmap(ImgSource, rect);
+                        images[i, j].Source = cropBitmap;
+                    }
+                    else
+                    {
+                        images[i, j].Source = null;
+                    }
+                }
+            }
         }
     }
 }

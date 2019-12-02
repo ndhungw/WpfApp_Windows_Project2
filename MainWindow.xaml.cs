@@ -39,6 +39,27 @@ namespace WpfApp_Windows_Project2
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Business.InitComponents(ref canvas,Rows,Cols);
+            Image[,] images = new Image[Rows, Cols];
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    var cropImage = new Image();
+                    cropImage.Width = width;
+                    cropImage.Height = height;
+                    cropImage.Source = null;
+                    canvas.Children.Add(cropImage);
+                    UI.setLeftTopImage(cropImage, startX + j * (width + 2), startY + i * (height + 2));
+
+                    //Events
+                    cropImage.MouseLeftButtonDown += CropImage_MouseLeftButtonDown;
+                    cropImage.PreviewMouseLeftButtonUp += CropImage_PreviewMouseLeftButtonUp;
+                    cropImage.Tag = new Tuple<int, int>(i, j);
+
+                    images[i, j] = cropImage;
+                }
+            }
+            UI.SetBoard(ref images, "");
         }
 
         bool _isDragging = false;
@@ -139,12 +160,16 @@ namespace WpfApp_Windows_Project2
 
         private void Save_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-
+            Business.SaveGame();
         }
 
         private void Load_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-
+            string link = Business.LoadGame();
+            if (link == null) return;
+            var ImgSource = new BitmapImage(
+                    new Uri(link, UriKind.Absolute));
+            previewImage.Source = ImgSource;
         }
 
         private void Browserbtn_Click(object sender, RoutedEventArgs e)
@@ -156,7 +181,6 @@ namespace WpfApp_Windows_Project2
                 UI.ClearBoard();
                 var ImgSource = new BitmapImage(
                     new Uri(screen.FileName, UriKind.Absolute));
-
                 previewImage.Source = ImgSource;
 
                 Image[,] images = new Image[Rows, Cols];
@@ -198,7 +222,7 @@ namespace WpfApp_Windows_Project2
                         }
                     }
                 }
-                UI.SetImages(ref images);
+                UI.SetBoard(ref images, screen.FileName);
                 Business.StartNewGame(Rows,Cols);
             }
         }
@@ -227,5 +251,6 @@ namespace WpfApp_Windows_Project2
         {
             Business.DirectionalMovement(2);
         }
+        
     }
 }
