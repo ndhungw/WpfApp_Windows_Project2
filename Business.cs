@@ -16,23 +16,13 @@ namespace WpfApp_Windows_Project2
 {
     public static class Business
     {
-        const int startX = 30;  //vị trí bắt đầu vẽ theo trục X
-        const int startY = 30;  //vị trí bắt đầu vẽ theo trục Y
+        const int startX = 71;  //vị trí bắt đầu vẽ theo trục X
+        const int startY = 40;  //vị trí bắt đầu vẽ theo trục Y
         const int width = 150;   //chiều rộng mỗi ô
         const int height = 150;  //chiều dài mỗi ô
-        const int margin = 2;
+        const int margin = 4;
 
         private static bool isShuffling = false;
-        public static Image CropImage(BitmapImage bitmapImage, Int32Rect int32Rect, int width, int height)
-        {
-            var cropBitmap = new CroppedBitmap(bitmapImage, int32Rect);
-            var cropImage = new Image();
-            cropImage.Stretch = Stretch.Fill;
-            cropImage.Width = width;
-            cropImage.Height = height;
-            cropImage.Source = cropBitmap;
-            return cropImage;
-        }
 
         /// <summary>
         /// Reset tro choi
@@ -71,6 +61,7 @@ namespace WpfApp_Windows_Project2
         {
             Database.ConstructDatabase(Rows, Cols);
             UI.Start(ref canvas, Rows, Cols);
+            UI.DrawLines();
         }
         
         /// <summary>
@@ -207,6 +198,10 @@ namespace WpfApp_Windows_Project2
             }
         }
 
+        /// <summary>
+        /// Load game
+        /// </summary>
+        /// <returns>Link hinh anh cua game load len, null neu load khong thanh cong</returns>
         public static string LoadGame()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -219,7 +214,7 @@ namespace WpfApp_Windows_Project2
                 {
                     string[] data = File.ReadAllLines(openFileDialog.FileName);
                     string link = data[0];
-                    if (!File.Exists(link)) throw (new Exception("File hinh anh khong hop le"));
+                    if (!File.Exists(link)) throw (new Exception());
                     int[,] matrix = new int[3, 3];
                     for (int i = 0; i < 3; i++)
                     {
@@ -230,23 +225,29 @@ namespace WpfApp_Windows_Project2
                         }
                     }
                     bool check = Database.ImportMatrix(matrix);
-                    if (!check) throw (new Exception("Ma tran khong hop le"));
+                    if (!check) throw (new Exception());
                     UI.LoadGame(link, matrix);
                     return link;
                     //Load thoi gian
                 }
-                catch (IOException e)
-                {
-                    MessageBox.Show("Invalid File!");
-                    return null;
-                }
                 catch (Exception e)
                 {
-                    MessageBox.Show(e.Message);
-                    return null;
+                    ClearBoard();
+                    Exception error = new Exception("Load game khong thanh cong!");
+                    throw (error);
                 }
             }
             return null;
         }
+
+        /// <summary>
+        /// Clear hinh anh hien tai khoi giao dien
+        /// </summary>
+        public static void ClearBoard()
+        {
+            UI.ClearBoard();
+            Database.RestartDatabase();
+        }
+        
     }
 }

@@ -6,17 +6,19 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 
 namespace WpfApp_Windows_Project2
 {
     public static class UI
     {
-        const int startX = 30;  //vị trí bắt đầu vẽ theo trục X
-        const int startY = 30;  //vị trí bắt đầu vẽ theo trục Y
+        const int startX = 71;  //vị trí bắt đầu vẽ theo trục X
+        const int startY = 40;  //vị trí bắt đầu vẽ theo trục Y
         const int width = 150;   //chiều rộng mỗi ô
         const int height = 150;  //chiều dài mỗi ô
-        const int margin = 2;
+        const int margin = 4;
 
         public static bool isEmpty = true;
         private static Canvas canvas;
@@ -32,6 +34,33 @@ namespace WpfApp_Windows_Project2
         {
             canvas = cv;
             images = new Image[Rows, Cols];
+        }
+
+        /// <summary>
+        /// Ve gameboard
+        /// </summary>
+        public static void DrawLines()
+        {
+            for (int i = 0; i <= images.GetLength(0); i++)
+            {
+                Line row = new Line();
+                Line col = new Line();
+                col.Stroke = new SolidColorBrush(Colors.Black);
+                row.Stroke = new SolidColorBrush(Colors.Black);
+                row.StrokeThickness = 4;
+                col.StrokeThickness = 4;
+                canvas.Children.Add(col);
+                canvas.Children.Add(row);
+                row.X1 = (startX-2);
+                row.Y1 = (startY - 2) + i * (height + margin);
+                row.X2 = (startX - 2) + 3 * (width + margin);
+                row.Y2 = (startY - 2) + i * (height + margin);
+
+                col.X1 = (startX - 2) + i * (width + margin);
+                col.Y1 = (startY - 2);
+                col.X2 = (startX - 2) + i * (width + margin);
+                col.Y2 = (startY - 2) + 3 * (height + margin);
+            }
         }
         public static void setLeftTopImage(Image _selectedBitmap, double left, double top)
         {
@@ -49,14 +78,22 @@ namespace WpfApp_Windows_Project2
         }
 
         /// <summary>
-        /// Load hinh len UI
+        /// Load ma tran hinh vao class UI
         /// </summary>
         /// <param name="imgs">ma tran Image</param>
-        public static void SetBoard(ref Image[,] imgs,string link)
+        public static void InitUIMatrix(ref Image[,] imgs)
         {
             images = imgs;
+        }
+
+        /// <summary>
+        /// Set link hinh anh goc
+        /// </summary>
+        /// <param name="link">link hinh</param>
+        public static void SetImage(string link)
+        {
             currentImageLink = link;
-            isEmpty = link.CompareTo("") == 0;
+            isEmpty = false;
         }
         
 
@@ -70,11 +107,16 @@ namespace WpfApp_Windows_Project2
         }
 
         /// <summary>
-        /// Clear canvas
+        /// Xoa source cua cac hinh anh va tra cac hinh anh ve dung thu tu
         /// </summary>
         public static void ClearBoard()
         {
-            canvas.Children.Clear();
+            UI.ResetBoard();
+            currentImageLink = null;
+            isEmpty = true;
+            for (int i = 0; i < images.GetLength(0); i++)
+                for (int j = 0; j < images.GetLength(1); j++)
+                    images[i, j].Source = null;
         }
         /// <summary>
         /// Doi cho 2 Image
@@ -104,7 +146,7 @@ namespace WpfApp_Windows_Project2
         }
 
         /// <summary>
-        /// Chuyen cac image trong ma tran ve dung vi tri
+        /// Chuyen cac image trong ma tran ve dung thu tu
         /// </summary>
         public static void ResetBoard()
         {
@@ -128,8 +170,13 @@ namespace WpfApp_Windows_Project2
         /// <param name="matrix">ma tran du lieu</param>
         public static void LoadGame(string link,int[,] matrix)
         {
-            UI.ResetBoard();
-            UI.ApplyImage(link);
+            UI.ClearBoard();
+            try
+            {
+                UI.ApplyImage(link);
+            }
+            catch (Exception e) {
+                throw (e); }
             UI.isEmpty = false;
             UI.currentImageLink = link;
             for (int i = 0; i < images.GetLength(0); i++)
@@ -181,9 +228,10 @@ namespace WpfApp_Windows_Project2
                     //Tạo mảnh, có 9 mảnh, trừ ô [i,j] = [2,2]
                     if (!(i == 2 && j == 2))
                     {
+                        var temp = ImgSource.Height > ImgSource.Width ? ImgSource.Width : ImgSource.Height;
                         //xử lí tạm thời, chỉ cắt sao cho ra vuông 3x3 (lấy phần bên trái)
-                        var h = (int)ImgSource.Height / 3;//chiều cao của 1 ô
-                        var w = (int)ImgSource.Height / 3;//chiều rộng của 1 ô
+                        var h = (int)(temp / 3);//chiều cao của 1 ô
+                        var w = (int)(temp / 3);//chiều rộng của 1 ô
                         var rect = new Int32Rect(j * w, i * h, w, h);//tạo khung
                         var cropBitmap = new CroppedBitmap(ImgSource, rect);
                         images[i, j].Source = cropBitmap;

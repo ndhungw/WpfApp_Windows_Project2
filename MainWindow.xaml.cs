@@ -30,37 +30,48 @@ namespace WpfApp_Windows_Project2
 
         const int Rows = 3; //số dòng mặc định
         const int Cols = 3; //số cột mặc định
-        const int startX = 30;  //vị trí bắt đầu vẽ theo trục X
-        const int startY = 30;  //vị trí bắt đầu vẽ theo trục Y
+        const int startX = 71;  //vị trí bắt đầu vẽ theo trục X
+        const int startY = 40;  //vị trí bắt đầu vẽ theo trục Y
         const int width = 150;   //chiều rộng mỗi ô
         const int height = 150;  //chiều dài mỗi ô
-        
+        const int margin = 4;
+        BitmapImage baseimage = new BitmapImage(new Uri("Images/BaseImage.jpg", UriKind.Relative));
         
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Business.InitComponents(ref canvas,Rows,Cols);
             Image[,] images = new Image[Rows, Cols];
-
+            ConnectToImageMatrix(ref images);
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 3; j++)
                 {
-                    var cropImage = new Image();
-                    cropImage.Width = width;
-                    cropImage.Height = height;
-                    cropImage.Source = null;
-                    canvas.Children.Add(cropImage);
-                    UI.setLeftTopImage(cropImage, startX + j * (width + 2), startY + i * (height + 2));
+                    images[i,j].Width = width;
+                    images[i, j].Height = height;
+                    images[i, j].Source = null;
+                    UI.setLeftTopImage(images[i, j], startX + j * (width + margin), startY + i * (height + margin));
 
                     //Events
-                    cropImage.MouseLeftButtonDown += CropImage_MouseLeftButtonDown;
-                    cropImage.PreviewMouseLeftButtonUp += CropImage_PreviewMouseLeftButtonUp;
-                    cropImage.Tag = new Tuple<int, int>(i, j);
-
-                    images[i, j] = cropImage;
+                    images[i, j].MouseLeftButtonDown += CropImage_MouseLeftButtonDown;
+                    images[i, j].PreviewMouseLeftButtonUp += CropImage_PreviewMouseLeftButtonUp;
+                    images[i, j].Tag = new Tuple<int, int>(i, j);
+                    
                 }
             }
-            UI.SetBoard(ref images, "");
+            UI.InitUIMatrix(ref images);
+        }
+
+        private void ConnectToImageMatrix(ref Image[,] images)
+        {
+            images[0, 0] = Image0;
+            images[0, 1] = Image1;
+            images[0, 2] = Image2;
+            images[1, 0] = Image3;
+            images[1, 1] = Image4;
+            images[1, 2] = Image5;
+            images[2, 0] = Image6;
+            images[2, 1] = Image7;
+            images[2, 2] = Image8;
         }
 
         bool _isDragging = false;
@@ -131,22 +142,6 @@ namespace WpfApp_Windows_Project2
 
         private void Window_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            //var position = e.GetPosition(this);
-
-            //int i = ((int)position.Y - startY) / height;
-            //int j = ((int)position.X - startX) / width;
-
-            //this.Title = $"{position.X} - {position.Y}, a[{i}][{j}]";
-
-            //var img = new Image();
-            //img.Width = 30;
-            //img.Height = 30;
-            //img.Source = new BitmapImage(
-            //    new Uri("circle.png", UriKind.Relative));
-            //canvas.Children.Add(img);
-
-            //Canvas.SetLeft(img, startX + j * width);
-            //Canvas.SetTop(img, startY + i * height);
         }
 
         private void previewImage_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -182,7 +177,16 @@ namespace WpfApp_Windows_Project2
 
         private void Load_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            string link = Business.LoadGame();
+            string link=null;
+            try
+            {
+                link = Business.LoadGame();
+            }
+            catch(Exception err)
+            {
+                MessageBox.Show(err.Message);
+                previewImage.Source = baseimage;
+            }
             if (link == null) return;
             var ImgSource = new BitmapImage(
                     new Uri(link, UriKind.Absolute));
@@ -195,51 +199,25 @@ namespace WpfApp_Windows_Project2
 
             if (screen.ShowDialog() == true)
             {
-                UI.ClearBoard();
-                var ImgSource = new BitmapImage(
-                    new Uri(screen.FileName, UriKind.Absolute));
-                previewImage.Source = ImgSource;
-
-                Image[,] images = new Image[Rows, Cols];
-                //Bắt đầu cắt thành 9 mảnh
-                for (int i = 0; i < 3; i++)
+                int[,] matrix = new int[Rows, Cols];
+                for (int i = 0; i < Rows; i++)
                 {
-                    for (int j = 0; j < 3; j++)
+                    for (int j = 0; j < Cols; j++)
                     {
-                        //Tạo mảnh, có 9 mảnh, trừ ô [i,j] = [2,2]
-                        if (!(i == 2 && j == 2))
-                        {
-                            //xử lí tạm thời, chỉ cắt sao cho ra vuông 3x3 (lấy phần bên trái)
-                            var h = (int)ImgSource.Height / 3;//chiều cao của 1 ô
-                            var w = (int)ImgSource.Height / 3;//chiều rộng của 1 ô
-                            var rect = new Int32Rect(j * w, i * h, w, h);//tạo khung
-
-                            var cropImage = Business.CropImage(ImgSource, rect, width, height);
-                            canvas.Children.Add(cropImage);
-                            UI.setLeftTopImage(cropImage, startX + j * (width + 2), startY + i * (height + 2));
-
-                            //Events
-                            cropImage.MouseLeftButtonDown += CropImage_MouseLeftButtonDown;
-                            cropImage.PreviewMouseLeftButtonUp += CropImage_PreviewMouseLeftButtonUp;
-                            cropImage.Tag = new Tuple<int, int>(i, j);
-
-                            images[i, j] = cropImage;
-                        }
-                        else
-                        {
-                            var cropImage = new Image();
-                            cropImage.Width = width;
-                            cropImage.Height = height;
-                            cropImage.Source = null;
-                            canvas.Children.Add(cropImage);
-                            UI.setLeftTopImage(cropImage, startX + j * (width + 2), startY + i * (height + 2));
-                            cropImage.Tag = new Tuple<int, int>(i, j);
-
-                            images[i, j] = cropImage;
-                        }
+                        matrix[i, j] = i * 3 + j;//0, 1, 2, ..., 8
                     }
                 }
-                UI.SetBoard(ref images, screen.FileName);
+                try
+                {
+                    previewImage.Source = new BitmapImage(new Uri(screen.FileName, UriKind.Absolute));
+                    UI.LoadGame(screen.FileName, matrix);
+                }
+                catch(Exception err) {
+                    previewImage.Source = baseimage;
+                    Business.ClearBoard();
+                    MessageBox.Show(err.Message);
+                    return;
+                }
                 Business.StartNewGame(Rows,Cols);
             }
         }
@@ -268,6 +246,11 @@ namespace WpfApp_Windows_Project2
         {
             Business.DirectionalMovement(1);
         }
-        
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            Business.ClearBoard();
+            previewImage.Source = baseimage;
+        }
     }
 }
