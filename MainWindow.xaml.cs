@@ -44,19 +44,27 @@ namespace WpfApp_Windows_Project2
         bool _isDragging = false;
         Image _selectedBitmap = null;
         Point _lastPosition;
+        Tuple<int, int> startMove;
 
         private void CropImage_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            
+            var position = e.GetPosition(this);
+            int i = (int)(position.Y - startY - Header.ActualHeight) / (height + 2);
+            int j = ((int)position.X - startX) / (width + 2);
             _isDragging = true;
             _selectedBitmap = sender as Image;
             _lastPosition = e.GetPosition(this);//vị trước khi được kéo đi nơi khác
+            startMove = new Tuple<int, int>(i, j);
+            //MessageBox.Show($"{i} - {j}");
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
         {
             var position = e.GetPosition(this);
-            int i = ((int)position.Y - startY) / height;
-            int j = ((int)position.X - startX) / width;
+            int i = (int)(position.Y - startY - Header.ActualHeight) / (height + 2);
+            int j = ((int)position.X - startX ) / (width + 2);
+            this.Title = $"{i} - {j}";
 
             if (_isDragging)
             {
@@ -70,9 +78,9 @@ namespace WpfApp_Windows_Project2
                     UI.setLeftTopImage(_selectedBitmap, lastLeft + dx, lastTop + dy);
 
                     _lastPosition = position;
-
                 }
             }
+
         }
 
         private void CropImage_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -80,15 +88,11 @@ namespace WpfApp_Windows_Project2
             _isDragging = false;
             var position = e.GetPosition(this);
 
-            int x = (int)(position.X - startX) / (width + 2) * (width + 2) + startX;
-            int y = (int)(position.Y - startY) / (height + 2) * (height + 2) + startY;
+            int i = (int)(position.Y - startY - Header.ActualHeight) / (height + 2);
+            int j = ((int)position.X - startX) / (width + 2);
 
-            UI.setLeftTopImage(_selectedBitmap, x, y);
-
-            var image = sender as Image;
-            var tuple = image.Tag as Tuple<int, int>;
-
-            MessageBox.Show($"{tuple.Item1} - {tuple.Item2}");
+            Tuple<int, int> newPosition = new Tuple<int, int>(i, j);
+            Business.DrapAndDrop(_selectedBitmap, startMove, newPosition);
         }
 
         private void Window_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -210,22 +214,22 @@ namespace WpfApp_Windows_Project2
 
         private void Up_Btn_Click(object sender, RoutedEventArgs e)
         {
-            Business.DirectionalMovement(3);
+            Business.DirectionalMovement(4);
         }
 
         private void Left_Btn_Click(object sender, RoutedEventArgs e)
         {
-            Business.DirectionalMovement(1);
+            Business.DirectionalMovement(2);
         }
 
         private void Down_Btn_Click(object sender, RoutedEventArgs e)
         {
-            Business.DirectionalMovement(4);
+            Business.DirectionalMovement(3);
         }
 
         private void Right_Btn_Click(object sender, RoutedEventArgs e)
         {
-            Business.DirectionalMovement(2);
+            Business.DirectionalMovement(1);
         }
     }
 }
