@@ -16,6 +16,12 @@ namespace WpfApp_Windows_Project2
 {
     public static class Business
     {
+        const int startX = 30;  //vị trí bắt đầu vẽ theo trục X
+        const int startY = 30;  //vị trí bắt đầu vẽ theo trục Y
+        const int width = 150;   //chiều rộng mỗi ô
+        const int height = 150;  //chiều dài mỗi ô
+        const int margin = 2;
+
         private static bool isShuffling = false;
         public static Image CropImage(BitmapImage bitmapImage, Int32Rect int32Rect, int width, int height)
         {
@@ -43,8 +49,8 @@ namespace WpfApp_Windows_Project2
             for (int i = 0; i < 150; i++)
             {
                 curDirection = rnd.Next(1, 4);
-                if(Math.Abs(curDirection-lastDirection)==1 &&
-                    (curDirection!=2 && lastDirection!=3) && (curDirection != 3 && lastDirection != 2))
+                if (Math.Abs(curDirection - lastDirection) == 1 &&
+                    (curDirection != 2 && lastDirection != 3) && (curDirection != 3 && lastDirection != 2))
                 {
                     i--;
                     continue;
@@ -88,9 +94,62 @@ namespace WpfApp_Windows_Project2
         }
 
         /// <summary>
+        /// Thực hiện việc xử lý khi kéo thả hình ảnh
+        /// </summary>
+        /// <param name="selectedBitmap">Hinh duoc chon</param>
+        /// <param name="startPoint">toa do bat dau keo</param>
+        /// <param name="endPoint">toa do bat dau tha</param>
+        /// <returns>true|| false nếu thành công hoặc thất bại</returns>
+        public static bool DrapAndDrop(Image selectedBitmap, Tuple<int, int> startPoint, Tuple<int, int> endPoint)
+        {
+            Tuple<int, int> blankSpot = Database.GetEmptySpot();
+
+
+            if ((int)endPoint.Item1 != (int)blankSpot.Item1 || (int)endPoint.Item2 != (int)blankSpot.Item2)
+            {
+                UI.setLeftTopImage(selectedBitmap, (int)startPoint.Item2 * ( width + margin) + startX, (int)startPoint.Item1 * (height + margin) + startY);
+                return false;
+            }
+
+            if(startPoint.Item1 - blankSpot.Item1 == 0)
+            {
+                switch (startPoint.Item2 - blankSpot.Item2)
+                {
+                    case 1: return Business.DirectionalMovement(2);
+
+                    case -1: return Business.DirectionalMovement(1);
+                    default:
+                        {
+                            UI.setLeftTopImage(selectedBitmap, (int)startPoint.Item2 * (width + margin) + startX, (int)startPoint.Item1 * (height + margin) + startY);
+                            return false;
+                        }
+                }
+            }
+
+            if (startPoint.Item2 - blankSpot.Item2 == 0)
+            {
+                switch (startPoint.Item1 - blankSpot.Item1)
+                {
+                    case 1: return Business.DirectionalMovement(4);
+
+                    case -1: return Business.DirectionalMovement(3);
+                    default:
+                        {
+                            UI.setLeftTopImage(selectedBitmap, (int)startPoint.Item2 * (width + margin) + startX, (int)startPoint.Item1 * (height + margin) + startY);
+                            return false;
+                        }
+                }
+            }
+
+            UI.setLeftTopImage(selectedBitmap, (int)startPoint.Item2 * (width + margin) + startX, (int)startPoint.Item1 * (height + margin) + startY);
+            return false;
+ 
+        }
+
+        /// <summary>
         /// Di chuyen doi tuong rong~ theo 1 trong 4 huong
         /// </summary>
-        /// <param name="direction">1:left; 2:right; 3:Up; 4:Down</param>
+        /// <param name="direction">1:right; 2:left; 3:Down; 4:Up</param>
         /// <returns></returns>
         public static bool DirectionalMovement(int direction)
         {

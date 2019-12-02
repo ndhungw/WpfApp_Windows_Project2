@@ -10,7 +10,7 @@
         MouseMove="Window_MouseMove"
         MouseLeftButtonUp="Window_MouseLeftButtonUp" WindowStartupLocation="CenterScreen">
     <DockPanel>
-        <Menu DockPanel.Dock="Top">
+        <Menu DockPanel.Dock="Top" Name="Header" Height="20">
             <MenuItem Header="Shuffle" Click="New_MenuItem_Click"/>
             <MenuItem Header="Save" Click="Save_MenuItem_Click"/>
             <MenuItem Header="Load" Click="Load_MenuItem_Click"/>
