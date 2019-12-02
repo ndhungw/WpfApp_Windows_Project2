@@ -40,6 +40,7 @@ namespace WpfApp_Windows_Project2
         {
             Business.InitComponents(ref canvas,Rows,Cols);
             Image[,] images = new Image[Rows, Cols];
+
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 3; j++)
@@ -69,15 +70,22 @@ namespace WpfApp_Windows_Project2
 
         private void CropImage_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            
             var position = e.GetPosition(this);
             int i = (int)(position.Y - startY - Header.ActualHeight) / (height + 2);
             int j = ((int)position.X - startX) / (width + 2);
+
+            if (_isDragging == true)
+            {
+                Tuple<int, int> newPosition = new Tuple<int, int>(i, j);
+                Business.DrapAndDrop(_selectedBitmap, startMove, newPosition);
+                _isDragging = false;
+                return;
+            }
+
             _isDragging = true;
             _selectedBitmap = sender as Image;
             _lastPosition = e.GetPosition(this);//vị trước khi được kéo đi nơi khác
             startMove = new Tuple<int, int>(i, j);
-            //MessageBox.Show($"{i} - {j}");
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
@@ -85,10 +93,11 @@ namespace WpfApp_Windows_Project2
             var position = e.GetPosition(this);
             int i = (int)(position.Y - startY - Header.ActualHeight) / (height + 2);
             int j = ((int)position.X - startX ) / (width + 2);
-            this.Title = $"{i} - {j}";
+            //this.Title = $"{i} - {j}";
 
             if (_isDragging)
             {
+
                 if (i < Rows && j < Cols)//kiểm tra điều kiện còn nằm trong vùng của thao tác kéo thả
                 {
                     var dx = position.X - _lastPosition.X;
@@ -100,12 +109,16 @@ namespace WpfApp_Windows_Project2
 
                     _lastPosition = position;
                 }
+
             }
 
         }
 
         private void CropImage_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
+            if (_isDragging == false)
+                return;
+
             _isDragging = false;
             var position = e.GetPosition(this);
 
