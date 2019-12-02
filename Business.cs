@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,7 +23,6 @@ namespace WpfApp_Windows_Project2
         const int margin = 2;
 
         private static bool isShuffling = false;
-
         public static Image CropImage(BitmapImage bitmapImage, Int32Rect int32Rect, int width, int height)
         {
             var cropBitmap = new CroppedBitmap(bitmapImage, int32Rect);
@@ -71,6 +72,7 @@ namespace WpfApp_Windows_Project2
             Database.ConstructDatabase(Rows, Cols);
             UI.Start(ref canvas, Rows, Cols);
         }
+        
         /// <summary>
         /// Thuc hien hoan vi 2 doi tuong hinh anh
         /// </summary>
@@ -82,7 +84,7 @@ namespace WpfApp_Windows_Project2
             bool check = Database.SwapPosition(point1, point2);
             if (!check) return check;
             UI.SwapPosition(point1, point2);
-            if (Database.CheckWin()&&!isShuffling)
+            if (Database.CheckWin()&&!isShuffling&&!UI.isEmpty)
             {
                 //Luu diem cua nguoi choi
                 MessageBox.Show("You won!");
@@ -176,6 +178,75 @@ namespace WpfApp_Windows_Project2
                     }
                 default:return false;
             }
+        }
+
+        /// <summary>
+        /// Luu trang thai game
+        /// </summary>
+        public static void SaveGame()
+        {
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+
+            saveFileDialog1.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+            saveFileDialog1.CreatePrompt = true;
+            saveFileDialog1.OverwritePrompt = true;
+            saveFileDialog1.FilterIndex = 2;
+            saveFileDialog1.DefaultExt = "txt";
+            saveFileDialog1.AddExtension = true;
+            saveFileDialog1.RestoreDirectory = true;
+
+            if (saveFileDialog1.ShowDialog() == true)
+            {
+                List<string> matrix = Database.ExportMatrix();
+                matrix.Insert(0, UI.GetImage());
+
+                //Save thoi gian
+
+                File.WriteAllLines(saveFileDialog1.FileName, matrix.ToArray());
+                MessageBox.Show("Game saved");
+            }
+        }
+
+        public static string LoadGame()
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+            openFileDialog.FilterIndex = 2;
+            openFileDialog.RestoreDirectory = true;
+            if (openFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    string[] data = File.ReadAllLines(openFileDialog.FileName);
+                    string link = data[0];
+                    if (!File.Exists(link)) throw (new Exception("File hinh anh khong hop le"));
+                    int[,] matrix = new int[3, 3];
+                    for (int i = 0; i < 3; i++)
+                    {
+                        string[] tokens = data[i + 1].Split(' ');
+                        for (int j = 0; j < 3; j++)
+                        {
+                            matrix[i, j] = int.Parse(tokens[j]);
+                        }
+                    }
+                    bool check = Database.ImportMatrix(matrix);
+                    if (!check) throw (new Exception("Ma tran khong hop le"));
+                    UI.LoadGame(link, matrix);
+                    return link;
+                    //Load thoi gian
+                }
+                catch (IOException e)
+                {
+                    MessageBox.Show("Invalid File!");
+                    return null;
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message);
+                    return null;
+                }
+            }
+            return null;
         }
     }
 }
