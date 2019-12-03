@@ -259,5 +259,15 @@ namespace WpfApp_Windows_Project2
             Business.ClearBoard();
             previewImage.Source = baseimage;
         }
+        
+        private void HintBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Business.GiveHint();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Business.DeleteTempData();
+        }
     }
 }

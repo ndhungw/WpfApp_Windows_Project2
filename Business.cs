@@ -29,8 +29,12 @@ namespace WpfApp_Windows_Project2
         /// </summary>
         public static void StartNewGame(int Rows, int Cols)
         {
+            UpdateTempData(null);
+            List<string> TempData = new List<string>();
+
             Database.ConstructDatabase(Rows, Cols);
             UI.ResetBoard();
+
             //Shuffle
             isShuffling = true;
             Random rnd = new Random();
@@ -45,10 +49,39 @@ namespace WpfApp_Windows_Project2
                     i--;
                     continue;
                 }
-                Business.DirectionalMovement(curDirection);
+                if (Business.DirectionalMovement(curDirection))
+                {
+                    string datatosave = Database.ToString();
+                    datatosave += " | ";
+                    switch (curDirection)
+                    {
+                        case 1:
+                            {
+                                datatosave += "2";
+                                break;
+                            }
+                        case 2:
+                            {
+                                datatosave += "1";
+                                break;
+                            }
+                        case 3:
+                            {
+                                datatosave += "4";
+                                break;
+                            }
+                        default:
+                            {
+                                datatosave += "3";
+                                break;
+                            }
+                    }
+                    TempData.Insert(0, datatosave);
+                }
                 lastDirection = curDirection;
             }
             isShuffling = false;
+            UpdateTempData(TempData);
         }
 
         /// <summary>
@@ -215,6 +248,13 @@ namespace WpfApp_Windows_Project2
             {
                 List<string> matrix = Database.ExportMatrix();
                 matrix.Insert(0, UI.GetImage());
+                List<string> Tempdata;
+                try
+                {
+                    Tempdata = GetTempData();
+                }catch(Exception e) { Tempdata = new List<string>(); }
+                matrix.Add(Tempdata.Count.ToString());
+                for (int i = 0; i < Tempdata.Count; i++) matrix.Add(Tempdata[i]);
 
                 //Save thoi gian
 
@@ -253,6 +293,17 @@ namespace WpfApp_Windows_Project2
                     bool check = Database.ImportMatrix(matrix);
                     if (!check) throw (new Exception());
                     UI.LoadGame(link, matrix);
+
+                    try
+                    {
+                        List<string> TempData = new List<string>();
+                        for(int i = 0; i < int.Parse(data[4]); i++)
+                        {
+                            TempData.Add(data[i + 5]);
+                        }
+                        UpdateTempData(TempData);
+                    }
+                    catch(Exception e) { UpdateTempData(null); }
                     return link;
                     //Load thoi gian
                 }
@@ -271,8 +322,85 @@ namespace WpfApp_Windows_Project2
         /// </summary>
         public static void ClearBoard()
         {
+            UpdateTempData(null);
             Database.RestartDatabase();
             UI.ClearBoard();
+        }
+
+        /// <summary>
+        /// Goi y nuoc di tiep theo cho nguoi dung
+        /// </summary>
+        public static void GiveHint()
+        {
+            try
+            {
+                List<string> Tempdata = GetTempData();
+                string key = Database.ToString();
+                int pos = TraverseTempData(key, Tempdata);
+                if (pos == -1)
+                {
+                    MessageBox.Show("Hint rong!");
+                    return;
+                }
+                string[] tokens = Tempdata[pos].Split(new string[] { " | " }, StringSplitOptions.RemoveEmptyEntries);
+                Tempdata.RemoveRange(0, pos + 1);
+                UpdateTempData(Tempdata);
+                DirectionalMovement(int.Parse(tokens[1]));
+            }
+            catch(Exception e)
+            {
+                MessageBox.Show("Hint bi loi! Vui long reset lai board de su dung hint");
+                UpdateTempData(null);
+                return;
+            }
+        }
+        public static void DeleteTempData()
+        {
+            string path = Directory.GetCurrentDirectory() + "\\TempData.txt";
+            File.Delete(path);
+        }
+
+
+
+
+
+        //------------------Cac ham phu, tro giup cho cac ham chinh
+        //--------Luu y: Do cac ham phu chi duoc su dung trong class nay 
+        //--------nen de private de khong bi nham lan voi cac ham chinh khi class Database duoc goi o cac class khac
+
+
+
+
+
+        private static void UpdateTempData(List<string> data)
+        {
+            string path = Directory.GetCurrentDirectory() + "\\TempData.txt";
+            if (data != null) File.WriteAllLines(path, data.ToArray());
+            else File.WriteAllText(path, "");
+        }
+
+        private static List<string> GetTempData()
+        {
+            string path = Directory.GetCurrentDirectory() + "\\TempData.txt";
+            string[] data;
+            try
+            {
+                data = File.ReadAllLines(path);
+            }
+            catch (IOException e) { throw (e); }
+            List<string> result = new List<string>();
+            for (int i = 0; i < data.Length; i++) result.Add(data[i]);
+            return result;
+        }
+        private static int TraverseTempData(string key, List<string>data)
+        {
+            int result = -1;
+            for(int i = data.Count-1; i >=0; i--)
+            {
+                string[] tokens = data[i].Split(new string[] { " | " },StringSplitOptions.RemoveEmptyEntries);
+                if (tokens[0].CompareTo(key) == 0) return i;
+            }
+            return result;
         }
         
     }
