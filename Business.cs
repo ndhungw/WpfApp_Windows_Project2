@@ -38,7 +38,7 @@ namespace WpfApp_Windows_Project2
             int curDirection = -1;
             for (int i = 0; i < 150; i++)
             {
-                curDirection = rnd.Next(1, 4);
+                curDirection = rnd.Next(1, 100) % 4 + 1;
                 if (Math.Abs(curDirection - lastDirection) == 1 &&
                     (curDirection != 2 && lastDirection != 3) && (curDirection != 3 && lastDirection != 2))
                 {
@@ -95,10 +95,12 @@ namespace WpfApp_Windows_Project2
         {
             Tuple<int, int> blankSpot = Database.GetEmptySpot();
 
+            UI.disableAnim = true;
 
             if ((int)endPoint.Item1 != (int)blankSpot.Item1 || (int)endPoint.Item2 != (int)blankSpot.Item2)
             {
                 UI.setLeftTopImage(selectedBitmap, (int)startPoint.Item2 * ( width + margin) + startX, (int)startPoint.Item1 * (height + margin) + startY);
+                UI.disableAnim = false;
                 return false;
             }
 
@@ -106,12 +108,23 @@ namespace WpfApp_Windows_Project2
             {
                 switch (startPoint.Item2 - blankSpot.Item2)
                 {
-                    case 1: return Business.DirectionalMovement(2);
+                    case 1:
+                        {
+                            bool check = Business.DirectionalMovement(2);
+                            UI.disableAnim = false;
+                            return check;
+                        }
 
-                    case -1: return Business.DirectionalMovement(1);
+                    case -1:
+                        {
+                            bool check = Business.DirectionalMovement(1);
+                            UI.disableAnim = false;
+                            return check;
+                        }
                     default:
                         {
                             UI.setLeftTopImage(selectedBitmap, (int)startPoint.Item2 * (width + margin) + startX, (int)startPoint.Item1 * (height + margin) + startY);
+                            UI.disableAnim = false;
                             return false;
                         }
                 }
@@ -121,18 +134,30 @@ namespace WpfApp_Windows_Project2
             {
                 switch (startPoint.Item1 - blankSpot.Item1)
                 {
-                    case 1: return Business.DirectionalMovement(4);
+                    case 1:
+                        {
+                            bool check = Business.DirectionalMovement(4);
+                            UI.disableAnim = false;
+                            return check;
+                        }
 
-                    case -1: return Business.DirectionalMovement(3);
+                    case -1:
+                        {
+                            bool check = Business.DirectionalMovement(3);
+                            UI.disableAnim = false;
+                            return check;
+                        }
                     default:
                         {
                             UI.setLeftTopImage(selectedBitmap, (int)startPoint.Item2 * (width + margin) + startX, (int)startPoint.Item1 * (height + margin) + startY);
+                            UI.disableAnim = false;
                             return false;
                         }
                 }
             }
 
             UI.setLeftTopImage(selectedBitmap, (int)startPoint.Item2 * (width + margin) + startX, (int)startPoint.Item1 * (height + margin) + startY);
+            UI.disableAnim = false;
             return false;
  
         }
@@ -178,10 +203,10 @@ namespace WpfApp_Windows_Project2
         {
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
 
-            saveFileDialog1.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+            saveFileDialog1.Filter = "txt files (*.txt)|*.txt";
             saveFileDialog1.CreatePrompt = true;
             saveFileDialog1.OverwritePrompt = true;
-            saveFileDialog1.FilterIndex = 2;
+            saveFileDialog1.FilterIndex = 1;
             saveFileDialog1.DefaultExt = "txt";
             saveFileDialog1.AddExtension = true;
             saveFileDialog1.RestoreDirectory = true;
@@ -205,8 +230,8 @@ namespace WpfApp_Windows_Project2
         public static string LoadGame()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
-            openFileDialog.FilterIndex = 2;
+            openFileDialog.Filter = "txt files (*.txt)|*.txt";
+            openFileDialog.FilterIndex = 1;
             openFileDialog.RestoreDirectory = true;
             if (openFileDialog.ShowDialog() == true)
             {
@@ -224,6 +249,7 @@ namespace WpfApp_Windows_Project2
                             matrix[i, j] = int.Parse(tokens[j]);
                         }
                     }
+                    ClearBoard();
                     bool check = Database.ImportMatrix(matrix);
                     if (!check) throw (new Exception());
                     UI.LoadGame(link, matrix);
@@ -245,8 +271,8 @@ namespace WpfApp_Windows_Project2
         /// </summary>
         public static void ClearBoard()
         {
-            UI.ClearBoard();
             Database.RestartDatabase();
+            UI.ClearBoard();
         }
         
     }

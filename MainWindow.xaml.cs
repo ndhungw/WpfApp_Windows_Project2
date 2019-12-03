@@ -188,8 +188,8 @@ namespace WpfApp_Windows_Project2
             }
             catch(Exception err)
             {
-                MessageBox.Show(err.Message);
                 previewImage.Source = baseimage;
+                MessageBox.Show(err.Message);
             }
             if (link == null) return;
             var ImgSource = new BitmapImage(
@@ -200,7 +200,9 @@ namespace WpfApp_Windows_Project2
         private void Browserbtn_Click(object sender, RoutedEventArgs e)
         {
             var screen = new OpenFileDialog();
-
+            screen.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png";
+            screen.FilterIndex = 1;
+            screen.DefaultExt = "png";
             if (screen.ShowDialog() == true)
             {
                 int[,] matrix = new int[Rows, Cols];
@@ -213,8 +215,9 @@ namespace WpfApp_Windows_Project2
                 }
                 try
                 {
-                    previewImage.Source = new BitmapImage(new Uri(screen.FileName, UriKind.Absolute));
+                    Business.ClearBoard();
                     UI.LoadGame(screen.FileName, matrix);
+                    previewImage.Source = new BitmapImage(new Uri(screen.FileName, UriKind.Absolute));
                 }
                 catch(Exception err) {
                     previewImage.Source = baseimage;

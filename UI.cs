@@ -22,10 +22,14 @@ namespace WpfApp_Windows_Project2
         const int margin = 4;
 
         public static bool isEmpty = true;
+        public static bool disableAnim = false;
         private static Canvas canvas;
         static public Window window;
         private static Image[,] images;
         private static string currentImageLink;
+        private static Line[,] rows;
+        private static Line[,] cols;
+
         /// <summary>
         /// Khoi dong UI
         /// </summary>
@@ -44,26 +48,29 @@ namespace WpfApp_Windows_Project2
         /// </summary>
         public static void DrawLines()
         {
-            for (int i = 0; i <= images.GetLength(0); i++)
-            {
-                Line row = new Line();
-                Line col = new Line();
-                col.Stroke = new SolidColorBrush(Colors.Black);
-                row.Stroke = new SolidColorBrush(Colors.Black);
-                row.StrokeThickness = 4;
-                col.StrokeThickness = 4;
-                canvas.Children.Add(col);
-                canvas.Children.Add(row);
-                row.X1 = (startX-2);
-                row.Y1 = (startY - 2) + i * (height + margin);
-                row.X2 = (startX - 2) + 3 * (width + margin);
-                row.Y2 = (startY - 2) + i * (height + margin);
+            rows = new Line[images.GetLength(0) + 1, images.GetLength(1)];
+            cols = new Line[images.GetLength(0) + 1, images.GetLength(1)];
+            for (int i = 0; i < rows.GetLength(0); i++)
+                for(int j = 0; j < rows.GetLength(1); j++)
+                {
+                    cols[i, j] = new Line();
+                    rows[i, j] = new Line();
+                    cols[i, j].Stroke = new SolidColorBrush(Colors.Black);
+                    rows[i, j].Stroke = new SolidColorBrush(Colors.Black);
+                    rows[i, j].StrokeThickness = 4;
+                    cols[i, j].StrokeThickness = 4;
+                    canvas.Children.Add(cols[i, j]);
+                    canvas.Children.Add(rows[i, j]);
+                    rows[i, j].X1 = (startX - 2) + j * (width + margin);
+                    rows[i, j].Y1 = (startY - 2) + i * (height + margin);
+                    rows[i, j].X2 = (startX - 2) + (j + 1) * (width + margin);
+                    rows[i, j].Y2 = (startY - 2) + i * (height + margin);
 
-                col.X1 = (startX - 2) + i * (width + margin);
-                col.Y1 = (startY - 2);
-                col.X2 = (startX - 2) + i * (width + margin);
-                col.Y2 = (startY - 2) + 3 * (height + margin);
-            }
+                    cols[i, j].X1 = (startX - 2) + i * (width + margin);
+                    cols[i, j].Y1 = (startY - 2) + j * (height + margin);
+                    cols[i, j].X2 = (startX - 2) + i * (width + margin);
+                    cols[i, j].Y2 = (startY - 2) + (j + 1) * (height + margin);
+                }
         }
         public static void setLeftTopImage(Image _selectedBitmap, double left, double top)
         {
@@ -130,26 +137,30 @@ namespace WpfApp_Windows_Project2
         {
             try
             {
-                if (point1.Item1 == point2.Item1)
+                if (isEmpty) return;
+                if (!disableAnim)
                 {
-                    if (point1.Item2 < point2.Item2)
-                        Animation(images[point2.Item1, point2.Item2], point2, 0, -(width + margin));
-                    else
+                    if (point1.Item1 == point2.Item1)
                     {
-                        if (point1.Item2 > point2.Item2)
-                            Animation(images[point2.Item1, point2.Item2], point2, 0, +(width + margin));
-                    }
-                }
-                else
-                {
-                    if (point1.Item2 == point2.Item2)
-                    {
-                        if (point1.Item1 < point2.Item1)
-                            Animation(images[point2.Item1, point2.Item2], point2, 1, -(height + margin));
+                        if (point1.Item2 < point2.Item2)
+                            Animation(images[point2.Item1, point2.Item2], point2, 0, -(width + margin));
                         else
                         {
-                            if (point1.Item1 > point2.Item1)
-                                Animation(images[point2.Item1, point2.Item2], point2, 1, +(height + margin));
+                            if (point1.Item2 > point2.Item2)
+                                Animation(images[point2.Item1, point2.Item2], point2, 0, +(width + margin));
+                        }
+                    }
+                    else
+                    {
+                        if (point1.Item2 == point2.Item2)
+                        {
+                            if (point1.Item1 < point2.Item1)
+                                Animation(images[point2.Item1, point2.Item2], point2, 1, -(height + margin));
+                            else
+                            {
+                                if (point1.Item1 > point2.Item1)
+                                    Animation(images[point2.Item1, point2.Item2], point2, 1, +(height + margin));
+                            }
                         }
                     }
                 }
@@ -167,6 +178,7 @@ namespace WpfApp_Windows_Project2
 
                 images[point1.Item1, point1.Item2] = images[point2.Item1, point2.Item2];
                 images[point2.Item1, point2.Item2] = temp;
+                HighlightBlankSpot();
             }
             catch (Exception e)
             {
@@ -230,7 +242,6 @@ namespace WpfApp_Windows_Project2
         /// <param name="matrix">ma tran du lieu</param>
         public static void LoadGame(string link,int[,] matrix)
         {
-            UI.ClearBoard();
             try
             {
                 UI.ApplyImage(link);
@@ -302,6 +313,21 @@ namespace WpfApp_Windows_Project2
                     }
                 }
             }
+        }
+
+        private static void HighlightBlankSpot()
+        {
+            Tuple<int, int> blankSpot = Database.GetEmptySpot();
+            for(int i=0;i<rows.GetLength(0);i++)
+                for(int j=0;j<rows.GetLength(1);j++)
+                {
+                    rows[i, j].Stroke = new SolidColorBrush(Colors.Black);
+                    cols[i, j].Stroke = new SolidColorBrush(Colors.Black);
+                }
+            rows[blankSpot.Item1, blankSpot.Item2].Stroke = new SolidColorBrush(Colors.Red);
+            rows[blankSpot.Item1 + 1, blankSpot.Item2].Stroke = new SolidColorBrush(Colors.Red);
+            cols[blankSpot.Item2, blankSpot.Item1].Stroke = new SolidColorBrush(Colors.Red);
+            cols[blankSpot.Item2 + 1, blankSpot.Item1].Stroke = new SolidColorBrush(Colors.Red);
         }
     }
 }
