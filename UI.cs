@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
@@ -22,6 +23,7 @@ namespace WpfApp_Windows_Project2
 
         public static bool isEmpty = true;
         private static Canvas canvas;
+        static public Window window;
         private static Image[,] images;
         private static string currentImageLink;
         /// <summary>
@@ -30,9 +32,10 @@ namespace WpfApp_Windows_Project2
         /// <param name="cv">Canvas</param>
         /// <param name="Rows">So dong</param>
         /// <param name="Cols">So cot</param>
-        public static void Start(ref Canvas cv,int Rows,int Cols)
+        public static void Start(ref Canvas cv, Window wd ,int Rows,int Cols)
         {
             canvas = cv;
+            window = wd;
             images = new Image[Rows, Cols];
         }
 
@@ -127,15 +130,41 @@ namespace WpfApp_Windows_Project2
         {
             try
             {
+                if (point1.Item1 == point2.Item1)
+                {
+                    if (point1.Item2 < point2.Item2)
+                        Animation(images[point2.Item1, point2.Item2], point2, 0, -(width + margin));
+                    else
+                    {
+                        if (point1.Item2 > point2.Item2)
+                            Animation(images[point2.Item1, point2.Item2], point2, 0, +(width + margin));
+                    }
+                }
+                else
+                {
+                    if (point1.Item2 == point2.Item2)
+                    {
+                        if (point1.Item1 < point2.Item1)
+                            Animation(images[point2.Item1, point2.Item2], point2, 1, -(height + margin));
+                        else
+                        {
+                            if (point1.Item1 > point2.Item1)
+                                Animation(images[point2.Item1, point2.Item2], point2, 1, +(height + margin));
+                        }
+                    }
+                }
+
                 double X1 = startX + point1.Item2 * (width + margin);
                 double Y1 = startY + point1.Item1 * (height + margin);
                 double X2 = startX + point2.Item2 * (width + margin);
                 double Y2 = startY + point2.Item1 * (height + margin);
+
                 Canvas.SetLeft(images[point1.Item1, point1.Item2], X2);
                 Canvas.SetTop(images[point1.Item1, point1.Item2], Y2);
                 Canvas.SetLeft(images[point2.Item1, point2.Item2], X1);
                 Canvas.SetTop(images[point2.Item1, point2.Item2], Y1);
                 Image temp = images[point1.Item1, point1.Item2];
+
                 images[point1.Item1, point1.Item2] = images[point2.Item1, point2.Item2];
                 images[point2.Item1, point2.Item2] = temp;
             }
@@ -145,6 +174,37 @@ namespace WpfApp_Windows_Project2
             }
         }
 
+        private static void Animation(Image image, Tuple<int, int> postion, int type, int distance)
+        {
+            var animation = new DoubleAnimation();
+
+            if (type == 0)
+            {
+
+                animation.From = (postion.Item2) * (width + margin) + startX;
+                animation.To = (postion.Item2) * (width + margin) + startX + distance;
+
+            }
+            else
+            {
+                animation.From = (postion.Item1) * (height + margin) + startY;
+                animation.To = (postion.Item1 ) * (height + margin) + startY + distance;
+            }
+
+            animation.Duration = new Duration(TimeSpan.FromSeconds(0.25));
+
+            var story = new Storyboard();
+            story.Children.Add(animation);
+            story.FillBehavior = FillBehavior.Stop;
+            Storyboard.SetTarget(animation, image);
+   
+            if(type == 0)
+                Storyboard.SetTargetProperty(animation, new PropertyPath(Canvas.LeftProperty));
+            else
+                Storyboard.SetTargetProperty(animation, new PropertyPath(Canvas.TopProperty));
+
+            story.Begin(window);
+        }
         /// <summary>
         /// Chuyen cac image trong ma tran ve dung thu tu
         /// </summary>
@@ -153,7 +213,7 @@ namespace WpfApp_Windows_Project2
             for (int i = 0; i < images.GetLength(0); i++)
                 for (int j = 0; j < images.GetLength(1); j++)
                 {
-                    Tuple<int,int> tag=images[i,j].Tag as Tuple<int,int>;
+                    Tuple<int, int> tag = images[i, j].Tag as Tuple<int, int>;
                     UI.SwapPosition(tag, new Tuple<int, int>(i, j));
                     if (i == tag.Item1 && j == tag.Item2) continue;
                     else

@@ -57,10 +57,10 @@ namespace WpfApp_Windows_Project2
         /// <param name="canvas">canvas</param>
         /// <param name="Rows">so dong</param>
         /// <param name="Cols">so cot</param>
-        public static void InitComponents(ref Canvas canvas,int Rows,int Cols)
+        public static void InitComponents(ref Canvas canvas,Window wd, int Rows,int Cols)
         {
             Database.ConstructDatabase(Rows, Cols);
-            UI.Start(ref canvas, Rows, Cols);
+            UI.Start(ref canvas, wd, Rows, Cols);
             UI.DrawLines();
         }
         

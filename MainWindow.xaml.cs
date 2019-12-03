@@ -39,7 +39,7 @@ namespace WpfApp_Windows_Project2
         
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Business.InitComponents(ref canvas,Rows,Cols);
+            Business.InitComponents(ref canvas,this,Rows,Cols);
             Image[,] images = new Image[Rows, Cols];
             ConnectToImageMatrix(ref images);
             for (int i = 0; i < 3; i++)
@@ -84,7 +84,7 @@ namespace WpfApp_Windows_Project2
             var position = e.GetPosition(this);
             int i = (int)(position.Y - startY - Header.ActualHeight) / (height + 2);
             int j = ((int)position.X - startX) / (width + 2);
-
+            
             if (_isDragging == true)
             {
                 Tuple<int, int> newPosition = new Tuple<int, int>(i, j);
@@ -138,6 +138,10 @@ namespace WpfApp_Windows_Project2
 
             Tuple<int, int> newPosition = new Tuple<int, int>(i, j);
             Business.DrapAndDrop(_selectedBitmap, startMove, newPosition);
+
+            var image = sender as Image;
+            image.ReleaseMouseCapture();
+
         }
 
         private void Window_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
