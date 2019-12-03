@@ -188,8 +188,8 @@ namespace WpfApp_Windows_Project2
             }
             catch(Exception err)
             {
-                MessageBox.Show(err.Message);
                 previewImage.Source = baseimage;
+                MessageBox.Show(err.Message);
             }
             if (link == null) return;
             var ImgSource = new BitmapImage(
@@ -213,8 +213,9 @@ namespace WpfApp_Windows_Project2
                 }
                 try
                 {
-                    previewImage.Source = new BitmapImage(new Uri(screen.FileName, UriKind.Absolute));
+                    Business.ClearBoard();
                     UI.LoadGame(screen.FileName, matrix);
+                    previewImage.Source = new BitmapImage(new Uri(screen.FileName, UriKind.Absolute));
                 }
                 catch(Exception err) {
                     previewImage.Source = baseimage;
