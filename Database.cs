@@ -137,6 +137,20 @@ namespace WpfApp_Windows_Project2
             return null;
         }
 
+        public static string ToString()
+        {
+            string result = "";
+            for (int i = 0; i < _a.GetLength(0); i++)
+            {
+                for (int j = 0; j < _a.GetLength(1); j++)
+                {
+                    result += _a[i, j].ToString();
+                    if (i != _a.GetLength(0) - 1 || j != _a.GetLength(1) - 1) result += " ";
+                }
+            }
+            return result;
+        }
+
 
 
         //------------------Cac ham phu, tro giup cho cac ham chinh

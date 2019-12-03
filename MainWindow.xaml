@@ -8,7 +8,7 @@
         Title="MainWindow" Height="600" Width="900" 
         Loaded="Window_Loaded"
         MouseMove="Window_MouseMove"
-        MouseLeftButtonUp="Window_MouseLeftButtonUp" WindowStartupLocation="CenterScreen">
+        MouseLeftButtonUp="Window_MouseLeftButtonUp" WindowStartupLocation="CenterScreen" Closing="Window_Closing">
     <DockPanel>
         <Menu DockPanel.Dock="Top" Name="Header" Height="20" Background="Black">
             <MenuItem Header="Actions" Foreground="White">
@@ -37,11 +37,14 @@
                    MouseLeftButtonUp="previewImage_MouseLeftButtonUp"
                    RenderOptions.BitmapScalingMode="HighQuality" Width="240" Height="240"/>
 
-                <Button Name="Browserbtn" Content="Browser" Width="100" Height="50" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="20" Click="Browserbtn_Click">
+                <Button Name="Browserbtn" Content="Browser" Width="100" Height="50" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="20 20 20 0" Click="Browserbtn_Click">
                     
                 </Button>
             </StackPanel>
-            <StackPanel Height="25"></StackPanel>
+            <StackPanel Height="55">
+                <Button Name="HintBtn" Content="Hint" HorizontalAlignment="Center" Width="50" Margin="0 10 0 0"
+                        Padding="5" Click="HintBtn_Click"></Button>
+            </StackPanel>
             <StackPanel >
                 <Button Name="Up_Btn" Width="40" Height="40" HorizontalAlignment="Center" Margin="0 2 0 5" Click="Up_Btn_Click">
                     <Image Source="/Images/up.png" Margin="5" RenderOptions.BitmapScalingMode="HighQuality" />
