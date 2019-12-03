@@ -203,10 +203,10 @@ namespace WpfApp_Windows_Project2
         {
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
 
-            saveFileDialog1.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+            saveFileDialog1.Filter = "txt files (*.txt)|*.txt";
             saveFileDialog1.CreatePrompt = true;
             saveFileDialog1.OverwritePrompt = true;
-            saveFileDialog1.FilterIndex = 2;
+            saveFileDialog1.FilterIndex = 1;
             saveFileDialog1.DefaultExt = "txt";
             saveFileDialog1.AddExtension = true;
             saveFileDialog1.RestoreDirectory = true;
@@ -230,8 +230,8 @@ namespace WpfApp_Windows_Project2
         public static string LoadGame()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
-            openFileDialog.FilterIndex = 2;
+            openFileDialog.Filter = "txt files (*.txt)|*.txt";
+            openFileDialog.FilterIndex = 1;
             openFileDialog.RestoreDirectory = true;
             if (openFileDialog.ShowDialog() == true)
             {

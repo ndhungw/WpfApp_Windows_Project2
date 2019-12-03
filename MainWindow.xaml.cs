@@ -200,7 +200,9 @@ namespace WpfApp_Windows_Project2
         private void Browserbtn_Click(object sender, RoutedEventArgs e)
         {
             var screen = new OpenFileDialog();
-
+            screen.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png";
+            screen.FilterIndex = 1;
+            screen.DefaultExt = "png";
             if (screen.ShowDialog() == true)
             {
                 int[,] matrix = new int[Rows, Cols];
