@@ -21,7 +21,8 @@ namespace WpfApp_Windows_Project2
         const int width = 150;   //chiều rộng mỗi ô
         const int height = 150;  //chiều dài mỗi ô
         const int margin = 4;
-
+        public static bool isPlaying = false;
+        private static int lastDirection = -1;
         private static bool isShuffling = false;
 
         /// <summary>
@@ -82,6 +83,7 @@ namespace WpfApp_Windows_Project2
             }
             isShuffling = false;
             UpdateTempData(TempData);
+            isPlaying = true;
         }
 
         /// <summary>
@@ -107,6 +109,44 @@ namespace WpfApp_Windows_Project2
         {
             bool check = Database.SwapPosition(point1, point2);
             if (!check) return check;
+
+            //Luu du lieu vao hint(temp data)
+            if (isPlaying)
+            {
+                string datatosave = Database.ToString();
+                int existOptimalPath = TraverseTempData(datatosave, GetTempData());
+                if (existOptimalPath != -1) CleanTempData(existOptimalPath - 1);
+                else
+                {
+                    datatosave += " | ";
+                    switch (lastDirection)
+                    {
+                        case 1:
+                            {
+                                datatosave += "2";
+                                break;
+                            }
+                        case 2:
+                            {
+                                datatosave += "1";
+                                break;
+                            }
+                        case 3:
+                            {
+                                datatosave += "4";
+                                break;
+                            }
+                        default:
+                            {
+                                datatosave += "3";
+                                break;
+                            }
+                    }
+                    AppendTempData(datatosave);
+                }
+            }
+            
+
             UI.SwapPosition(point1, point2);
             if (Database.CheckWin()&&!isShuffling&&!UI.isEmpty)
             {
@@ -202,6 +242,7 @@ namespace WpfApp_Windows_Project2
         /// <returns></returns>
         public static bool DirectionalMovement(int direction)
         {
+            lastDirection = direction;
             Tuple<int, int> blankSpot = Database.GetEmptySpot();
             switch (direction)
             {
@@ -303,7 +344,8 @@ namespace WpfApp_Windows_Project2
                         }
                         UpdateTempData(TempData);
                     }
-                    catch(Exception e) { UpdateTempData(null); }
+                    catch(Exception e) { throw (e); }
+                    isPlaying = true;
                     return link;
                     //Load thoi gian
                 }
@@ -322,6 +364,7 @@ namespace WpfApp_Windows_Project2
         /// </summary>
         public static void ClearBoard()
         {
+            isPlaying = false;
             UpdateTempData(null);
             Database.RestartDatabase();
             UI.ClearBoard();
@@ -343,8 +386,7 @@ namespace WpfApp_Windows_Project2
                     return;
                 }
                 string[] tokens = Tempdata[pos].Split(new string[] { " | " }, StringSplitOptions.RemoveEmptyEntries);
-                Tempdata.RemoveRange(0, pos + 1);
-                UpdateTempData(Tempdata);
+                CleanTempData(pos);
                 DirectionalMovement(int.Parse(tokens[1]));
             }
             catch(Exception e)
@@ -377,6 +419,27 @@ namespace WpfApp_Windows_Project2
             string path = Directory.GetCurrentDirectory() + "\\TempData.txt";
             if (data != null) File.WriteAllLines(path, data.ToArray());
             else File.WriteAllText(path, "");
+        }
+        private static void AppendTempData(string datatosave)
+        {
+            string path = Directory.GetCurrentDirectory() + "\\TempData.txt";
+            string[] data;
+            try
+            {
+                data = File.ReadAllLines(path);
+            }
+            catch (IOException e) { UpdateTempData(null); return; }
+            List<string> temp = GetTempData();
+            temp.Insert(0, datatosave);
+            UpdateTempData(temp);
+
+        }
+
+        private static void CleanTempData(int pos)
+        {
+            List<string> data = GetTempData();
+            data.RemoveRange(0, pos + 1);
+            UpdateTempData(data);
         }
 
         private static List<string> GetTempData()
