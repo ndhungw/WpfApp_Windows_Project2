@@ -8,18 +8,19 @@
         Title="MainWindow" Height="600" Width="900" 
         Loaded="Window_Loaded"
         MouseMove="Window_MouseMove"
-        MouseLeftButtonUp="Window_MouseLeftButtonUp" WindowStartupLocation="CenterScreen" Closing="Window_Closing">
+        MouseLeftButtonUp="Window_MouseLeftButtonUp" WindowStartupLocation="CenterScreen" Closing="Window_Closing" 
+        Keyboard.KeyDown="Window_KeyDown">
     <DockPanel>
         <Menu DockPanel.Dock="Top" Name="Header" Height="20" Background="Black">
-            <MenuItem Header="Actions" Foreground="White">
+            <MenuItem Header="Actions" Foreground="White" Focusable="False">
                 <MenuItem Header="Shuffle" Click="New_MenuItem_Click"  Foreground="Black"/>
                 <MenuItem Header="Clear" Click="MenuItem_Click" Foreground="Black"/>
                 <MenuItem Header="Save" Click="Save_MenuItem_Click" Foreground="Black"/>
                 <MenuItem Header="Load" Click="Load_MenuItem_Click" Foreground="Black"/>
             </MenuItem>
-            <MenuItem Header="Leaderboard " Click="Leaderboard_MenuItem_Click"  Foreground="White"/>
+            <MenuItem Header="Leaderboard " Click="Leaderboard_MenuItem_Click"  Foreground="White" Focusable="False"/>
         </Menu>
-        <Canvas Name="canvas" DockPanel.Dock="Left" Width="600">
+        <Canvas Name="canvas" DockPanel.Dock="Left" Width="600" >
             <Image Name="Image0"/>
             <Image Name="Image1"/>
             <Image Name="Image2"/>
