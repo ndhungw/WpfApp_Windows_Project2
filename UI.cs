@@ -292,6 +292,8 @@ namespace WpfApp_Windows_Project2
         {
             var ImgSource = new BitmapImage(
                     new Uri(link, UriKind.Absolute));
+            var temp = ImgSource.PixelHeight > ImgSource.PixelWidth ? ImgSource.PixelWidth : ImgSource.PixelHeight;
+
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 3; j++)
@@ -299,7 +301,6 @@ namespace WpfApp_Windows_Project2
                     //Tạo mảnh, có 9 mảnh, trừ ô [i,j] = [2,2]
                     if (!(i == 2 && j == 2))
                     {
-                        var temp = ImgSource.Height > ImgSource.Width ? ImgSource.Width : ImgSource.Height;
                         //xử lí tạm thời, chỉ cắt sao cho ra vuông 3x3 (lấy phần bên trái)
                         var h = (int)(temp / 3);//chiều cao của 1 ô
                         var w = (int)(temp / 3);//chiều rộng của 1 ô
