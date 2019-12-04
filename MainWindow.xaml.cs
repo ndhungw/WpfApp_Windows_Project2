@@ -15,6 +15,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace WpfApp_Windows_Project2
 {
@@ -36,7 +37,6 @@ namespace WpfApp_Windows_Project2
         const int height = 150;  //chiều dài mỗi ô
         const int margin = 4;
         BitmapImage baseimage = new BitmapImage(new Uri("Images/BaseImage.jpg", UriKind.Relative));
-        
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Business.InitComponents(ref canvas,this,Rows,Cols);
@@ -226,7 +226,23 @@ namespace WpfApp_Windows_Project2
                     return;
                 }
                 Business.StartNewGame(Rows,Cols);
+
+                //TIMER
+                TimeStart = DateTime.Now;//lay thoi diem hien tai
+                timer = new DispatcherTimer();
+                timer.Interval = TimeSpan.FromSeconds(1);
+                timer.Tick += timer_Tick;
+                timer.Start();
+                
             }
+            
+        }
+        DateTime TimeStart;
+        DispatcherTimer timer;
+        void timer_Tick(object sender, EventArgs e)
+        {
+            TimeSpan res = DateTime.Now.Subtract(TimeStart);
+            TimerTextBlock.Text = res.ToString(@"hh\:mm\:ss"); 
         }
 
         private void Leaderboard_MenuItem_Click(object sender, RoutedEventArgs e)

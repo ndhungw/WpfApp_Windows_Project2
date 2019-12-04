@@ -148,11 +148,11 @@ namespace WpfApp_Windows_Project2
             
 
             UI.SwapPosition(point1, point2);
-            if (Database.CheckWin()&&!isShuffling&&!UI.isEmpty)
+            if (Database.CheckWin() && !isShuffling && !UI.isEmpty)
             {
                 //Luu diem cua nguoi choi
                 MessageBox.Show("You won!");
-                Business.StartNewGame(3,3);
+                Business.StartNewGame(3, 3);
             }
             return check;
         }
