@@ -269,5 +269,27 @@ namespace WpfApp_Windows_Project2
         {
             Business.DeleteTempData();
         }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Left)
+            {
+                Business.DirectionalMovement(2);
+            }
+            if (e.Key == Key.Right)
+            {
+                Business.DirectionalMovement(1);
+            }
+            if (e.Key == Key.Down)
+            {
+                Business.DirectionalMovement(3);
+            }
+            if (e.Key == Key.Up)
+            {
+                Business.DirectionalMovement(4);
+            }
+
+        }
+
     }
 }
