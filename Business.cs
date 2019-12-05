@@ -169,10 +169,44 @@ namespace WpfApp_Windows_Project2
                  Continue -> Save game (?leadboard) -> Business.StartNewGame(3, 3);
                  Cancel -> out
                  */
+                /*Edit Leaderboard*/
+                TimeSpan thisPlayerTime = convertStringToTimeSpan(UI.timerTextBlock.Text);
+                CheckLeaderBoard(thisPlayerTime, "player1");
 
                 Business.StartNewGame(3, 3);
             }
             return check;
+        }
+
+        private static void CheckLeaderBoard(TimeSpan timeSpan,string playerName)
+        {
+            double resultAsSeconds = timeSpan.TotalSeconds;
+
+            /*Load file leaderboard*/
+            string path = AppDomain.CurrentDomain.BaseDirectory;
+            string[] leaderboardData = File.ReadAllLines(path + "LeaderboardData.txt");
+            
+            for(int i = leaderboardData.Length - 1; i >= 0 ; i--)
+            {
+                string[] leaderTokens = leaderboardData[i].Split(' ');//Tên - thời gian
+                string[] leaderTimeTokens = leaderTokens[1].Split(':');//Giờ - phút - giây
+                double leaderResultAsSecond = int.Parse(leaderTimeTokens[0]) * 3600 + int.Parse(leaderTimeTokens[1]) * 60 + int.Parse(leaderTimeTokens[2]);
+                if(resultAsSeconds < leaderResultAsSecond)
+                {
+                    //Edit tên
+                    leaderTokens[0] = playerName;
+                    //Edit thời gian
+                    leaderTokens[1] = timeSpan.ToString();
+                }
+            }
+            return;
+        }
+
+        public static TimeSpan convertStringToTimeSpan(string str)
+        {
+            string[] timeTokens = str.Split(':');
+            TimeSpan res = new TimeSpan(int.Parse(timeTokens[0]), int.Parse(timeTokens[1]), int.Parse(timeTokens[2]));
+            return res;
         }
 
         /// <summary>

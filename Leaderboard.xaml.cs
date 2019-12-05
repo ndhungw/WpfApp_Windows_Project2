@@ -22,6 +22,10 @@ namespace WpfApp_Windows_Project2
         public Leaderboard()
         {
             InitializeComponent();
+
+            List<object> data;
         }
+
+
     }
 }

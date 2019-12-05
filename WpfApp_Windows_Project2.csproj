@@ -113,5 +113,10 @@
   <ItemGroup>
     <Resource Include="Images\BaseImage.jpg" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="LeaderboardData.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
