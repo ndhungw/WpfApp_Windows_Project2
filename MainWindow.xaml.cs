@@ -37,6 +37,7 @@ namespace WpfApp_Windows_Project2
         const int height = 150;  //chiều dài mỗi ô
         const int margin = 4;
         BitmapImage baseimage = new BitmapImage(new Uri("Images/BaseImage.jpg", UriKind.Relative));
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Business.InitComponents(ref canvas,this,Rows,Cols);
@@ -225,24 +226,30 @@ namespace WpfApp_Windows_Project2
                     MessageBox.Show(err.Message);
                     return;
                 }
-                Business.StartNewGame(Rows,Cols);
 
-                //TIMER
-                TimeStart = DateTime.Now;//lay thoi diem hien tai
-                timer = new DispatcherTimer();
-                timer.Interval = TimeSpan.FromSeconds(1);
-                timer.Tick += timer_Tick;
-                timer.Start();
-                
+                Business.TimeStart = DateTime.Now;//lay thoi diem hien tai
+                Business.timer = new DispatcherTimer();
+                Business.timer.Interval = TimeSpan.FromSeconds(1);
+                Business.timer.Tick += timer_Tick;
+                //Business.timer.Start();
+
+                Business.StartNewGame(Rows,Cols);
             }
-            
         }
-        DateTime TimeStart;
-        DispatcherTimer timer;
-        void timer_Tick(object sender, EventArgs e)
+
+        public void timer_Tick(object sender, EventArgs e)
         {
-            TimeSpan res = DateTime.Now.Subtract(TimeStart);
-            TimerTextBlock.Text = res.ToString(@"hh\:mm\:ss"); 
+            if (Business.isPlaying == true)
+            {
+                TimeSpan res = DateTime.Now.Subtract(Business.TimeStart);
+                TimerTextBlock.Text = res.ToString(@"hh\:mm\:ss");
+            }
+            else
+            {
+                Business.timer.Stop();
+                TimerTextBlock.Text = "00:00:00";
+                Business.TimeStart = DateTime.Now;
+            }
         }
 
         private void Leaderboard_MenuItem_Click(object sender, RoutedEventArgs e)

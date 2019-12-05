@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 
 namespace WpfApp_Windows_Project2
 {
@@ -24,6 +26,8 @@ namespace WpfApp_Windows_Project2
         public static bool isPlaying = false;
         private static int lastDirection = -1;
         private static bool isShuffling = false;
+        public static DateTime TimeStart;
+        public static DispatcherTimer timer;
 
         /// <summary>
         /// Reset tro choi
@@ -84,8 +88,12 @@ namespace WpfApp_Windows_Project2
             isShuffling = false;
             UpdateTempData(TempData);
             isPlaying = true;
+
+            Business.timer.Start();
+
         }
 
+        
         /// <summary>
         /// Khoi tao tro choi
         /// </summary>
@@ -150,9 +158,21 @@ namespace WpfApp_Windows_Project2
             UI.SwapPosition(point1, point2);
             if (Database.CheckWin() && !isShuffling && !UI.isEmpty)
             {
+                Business.timer.Stop();
+
                 //Luu diem cua nguoi choi
                 MessageBox.Show("You won!");
+                //isPlaying = false;
+                //Debug.WriteLine(isPlaying);
+
+                /*
+                 SHOW DIALOG: Play again?
+                 Continue -> Save game (?leadboard) -> Business.StartNewGame(3, 3);
+                 Cancel -> out
+                 
+                 */
                 Business.StartNewGame(3, 3);
+                //Debug.WriteLine(isPlaying);
             }
             return check;
         }
