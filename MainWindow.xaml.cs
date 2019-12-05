@@ -36,19 +36,20 @@ namespace WpfApp_Windows_Project2
         const int height = 150;  //chiều dài mỗi ô
         const int margin = 4;
         BitmapImage baseimage = new BitmapImage(new Uri("Images/BaseImage.jpg", UriKind.Relative));
-        
+        Image[,] images;
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Business.InitComponents(ref canvas,this,Rows,Cols);
-            Image[,] images = new Image[Rows, Cols];
-            ConnectToImageMatrix(ref images);
+            images = new Image[Rows, Cols];
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 3; j++)
                 {
+                    images[i, j] = new Image();
                     images[i,j].Width = width;
                     images[i, j].Height = height;
                     images[i, j].Source = null;
+                    canvas.Children.Add(images[i, j]);
                     UI.setLeftTopImage(images[i, j], startX + j * (width + margin), startY + i * (height + margin));
 
                     //Events
@@ -61,18 +62,6 @@ namespace WpfApp_Windows_Project2
             UI.InitUIMatrix(ref images);
         }
 
-        private void ConnectToImageMatrix(ref Image[,] images)
-        {
-            images[0, 0] = Image0;
-            images[0, 1] = Image1;
-            images[0, 2] = Image2;
-            images[1, 0] = Image3;
-            images[1, 1] = Image4;
-            images[1, 2] = Image5;
-            images[2, 0] = Image6;
-            images[2, 1] = Image7;
-            images[2, 2] = Image8;
-        }
 
         bool _isDragging = false;
         Image _selectedBitmap = null;
@@ -81,6 +70,9 @@ namespace WpfApp_Windows_Project2
 
         private void CropImage_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            var imageCrop = sender as Image;
+            UI.setZIndex(imageCrop);
+
             var position = e.GetPosition(this);
             int i = (int)(position.Y - startY - Header.ActualHeight) / (height + 2);
             int j = ((int)position.X - startX) / (width + 2);
