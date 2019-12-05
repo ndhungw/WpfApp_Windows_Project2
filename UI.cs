@@ -17,8 +17,8 @@ namespace WpfApp_Windows_Project2
     {
         const int startX = 71;  //vị trí bắt đầu vẽ theo trục X
         const int startY = 40;  //vị trí bắt đầu vẽ theo trục Y
-        const int width = 150;   //chiều rộng mỗi ô
-        const int height = 150;  //chiều dài mỗi ô
+        const int width = 150;  //chiều rộng mỗi ô
+        const int height = 150; //chiều dài mỗi ô
         const int margin = 4;
 
         public static bool isEmpty = true;
@@ -29,6 +29,7 @@ namespace WpfApp_Windows_Project2
         private static string currentImageLink;
         private static Line[,] rows;
         private static Line[,] cols;
+        public static TextBlock timerTextBlock;
 
         /// <summary>
         /// Khoi dong UI
@@ -36,11 +37,27 @@ namespace WpfApp_Windows_Project2
         /// <param name="cv">Canvas</param>
         /// <param name="Rows">So dong</param>
         /// <param name="Cols">So cot</param>
-        public static void Start(ref Canvas cv, Window wd ,int Rows,int Cols)
+        public static void Start(ref Canvas cv, Window wd ,int Rows,int Cols, ref TextBlock textBlock)
         {
             canvas = cv;
             window = wd;
             images = new Image[Rows, Cols];
+            timerTextBlock = textBlock;
+        }
+
+        public static void timer_Tick(object sender, EventArgs e)
+        {
+            if (Business.isPlaying == true)
+            {
+                TimeSpan res = DateTime.Now.Subtract(Business.TimeStart);
+                timerTextBlock.Text = res.ToString(@"hh\:mm\:ss");
+            }
+            else
+            {
+                Business.timer.Stop();
+                timerTextBlock.Text = "00:00:00";
+                Business.TimeStart = DateTime.Now;
+            }
         }
 
         /// <summary>

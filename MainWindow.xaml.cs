@@ -40,7 +40,7 @@ namespace WpfApp_Windows_Project2
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Business.InitComponents(ref canvas,this,Rows,Cols);
+            Business.InitComponents(ref canvas, this, Rows, Cols, ref TimerTextBlock);
             Image[,] images = new Image[Rows, Cols];
             ConnectToImageMatrix(ref images);
             for (int i = 0; i < 3; i++)
@@ -226,35 +226,30 @@ namespace WpfApp_Windows_Project2
                     MessageBox.Show(err.Message);
                     return;
                 }
-                
-                //set up time
-                Business.TimeStart = DateTime.Now;//lay thoi diem hien tai
-                Business.timer = new DispatcherTimer();
-                Business.timer.Interval = TimeSpan.FromSeconds(1);
-                Business.timer.Tick += timer_Tick;
 
                 Business.StartNewGame(Rows,Cols);
             }
         }
 
-        public void timer_Tick(object sender, EventArgs e)
-        {
-            if (Business.isPlaying == true)
-            {
-                TimeSpan res = DateTime.Now.Subtract(Business.TimeStart);
-                TimerTextBlock.Text = res.ToString(@"hh\:mm\:ss");
-            }
-            else
-            {
-                Business.timer.Stop();
-                TimerTextBlock.Text = "00:00:00";
-                Business.TimeStart = DateTime.Now;
-            }
-        }
+        //public void timer_Tick(object sender, EventArgs e)
+        //{
+        //    if (Business.isPlaying == true)
+        //    {
+        //        TimeSpan res = DateTime.Now.Subtract(Business.TimeStart);
+        //        TimerTextBlock.Text = res.ToString(@"hh\:mm\:ss");
+        //    }
+        //    else
+        //    {
+        //        Business.timer.Stop();
+        //        TimerTextBlock.Text = "00:00:00";
+        //        Business.TimeStart = DateTime.Now;
+        //    }
+        //}
 
         private void Leaderboard_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-
+            Leaderboard f = new Leaderboard();
+            f.ShowDialog();
         }
 
         private void Up_Btn_Click(object sender, RoutedEventArgs e)

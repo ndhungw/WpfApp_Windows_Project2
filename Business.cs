@@ -26,8 +26,8 @@ namespace WpfApp_Windows_Project2
         public static bool isPlaying = false;
         private static int lastDirection = -1;
         private static bool isShuffling = false;
-        public static DateTime TimeStart;
-        public static DispatcherTimer timer;
+        public static DateTime TimeStart = new DateTime();
+        public static DispatcherTimer timer = new DispatcherTimer();
 
         /// <summary>
         /// Reset tro choi
@@ -89,10 +89,12 @@ namespace WpfApp_Windows_Project2
             UpdateTempData(TempData);
             isPlaying = true;
 
-            Business.timer.Start();
-
+            ////set up time
+            TimeStart = DateTime.Now;//lay thoi diem hien tai
+            timer.Interval = TimeSpan.FromSeconds(1);
+            timer.Tick += UI.timer_Tick;
+            timer.Start();
         }
-
         
         /// <summary>
         /// Khoi tao tro choi
@@ -100,10 +102,10 @@ namespace WpfApp_Windows_Project2
         /// <param name="canvas">canvas</param>
         /// <param name="Rows">so dong</param>
         /// <param name="Cols">so cot</param>
-        public static void InitComponents(ref Canvas canvas,Window wd, int Rows,int Cols)
+        public static void InitComponents(ref Canvas canvas,Window wd, int Rows,int Cols, ref TextBlock textBlock)
         {
             Database.ConstructDatabase(Rows, Cols);
-            UI.Start(ref canvas, wd, Rows, Cols);
+            UI.Start(ref canvas, wd, Rows, Cols,ref textBlock);
             UI.DrawLines();
         }
         
@@ -154,7 +156,6 @@ namespace WpfApp_Windows_Project2
                 }
             }
             
-
             UI.SwapPosition(point1, point2);
             if (Database.CheckWin() && !isShuffling && !UI.isEmpty)
             {
@@ -170,7 +171,6 @@ namespace WpfApp_Windows_Project2
                  */
 
                 Business.StartNewGame(3, 3);
-                TimeStart = DateTime.Now;
             }
             return check;
         }
@@ -316,6 +316,8 @@ namespace WpfApp_Windows_Project2
                 for (int i = 0; i < Tempdata.Count; i++) matrix.Add(Tempdata[i]);
 
                 //Save thoi gian
+                matrix.Add(UI.timerTextBlock.Text);//thời gian hiện trên UI
+                matrix.Add((DateTime.Now.Subtract(TimeStart)).ToString());//TimeSpan
 
                 File.WriteAllLines(saveFileDialog1.FileName, matrix.ToArray());
                 MessageBox.Show("Game saved");
@@ -340,6 +342,7 @@ namespace WpfApp_Windows_Project2
                     string link = data[0];
                     if (!File.Exists(link)) throw (new Exception());
                     int[,] matrix = new int[3, 3];
+
                     for (int i = 0; i < 3; i++)
                     {
                         string[] tokens = data[i + 1].Split(' ');
@@ -348,6 +351,7 @@ namespace WpfApp_Windows_Project2
                             matrix[i, j] = int.Parse(tokens[j]);
                         }
                     }
+
                     ClearBoard();
                     bool check = Database.ImportMatrix(matrix);
                     if (!check) throw (new Exception());
@@ -363,9 +367,20 @@ namespace WpfApp_Windows_Project2
                         UpdateTempData(TempData);
                     }
                     catch(Exception e) { throw (e); }
+
                     isPlaying = true;
+
+                    /*Load thoi gian*/
+                    UI.timerTextBlock.Text = data[8];
+                    string[] timeTokens = UI.timerTextBlock.Text.Split(':');
+                    TimeSpan TimeAddition = new TimeSpan(int.Parse(timeTokens[0]), int.Parse(timeTokens[1]), int.Parse(timeTokens[2]));
+
+                    TimeStart = DateTime.Now.Subtract(TimeAddition);
+                    timer.Interval = TimeSpan.FromSeconds(1);
+                    timer.Tick += UI.timer_Tick;
+                    timer.Start();
+
                     return link;
-                    //Load thoi gian
                 }
                 catch (Exception e)
                 {
