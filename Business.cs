@@ -162,17 +162,15 @@ namespace WpfApp_Windows_Project2
 
                 //Luu diem cua nguoi choi
                 MessageBox.Show("You won!");
-                //isPlaying = false;
-                //Debug.WriteLine(isPlaying);
 
                 /*
                  SHOW DIALOG: Play again?
                  Continue -> Save game (?leadboard) -> Business.StartNewGame(3, 3);
                  Cancel -> out
-                 
                  */
+
                 Business.StartNewGame(3, 3);
-                //Debug.WriteLine(isPlaying);
+                TimeStart = DateTime.Now;
             }
             return check;
         }

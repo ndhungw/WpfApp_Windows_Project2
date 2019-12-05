@@ -226,12 +226,12 @@ namespace WpfApp_Windows_Project2
                     MessageBox.Show(err.Message);
                     return;
                 }
-
+                
+                //set up time
                 Business.TimeStart = DateTime.Now;//lay thoi diem hien tai
                 Business.timer = new DispatcherTimer();
                 Business.timer.Interval = TimeSpan.FromSeconds(1);
                 Business.timer.Tick += timer_Tick;
-                //Business.timer.Start();
 
                 Business.StartNewGame(Rows,Cols);
             }
