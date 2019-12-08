@@ -15,6 +15,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace WpfApp_Windows_Project2
 {
@@ -36,11 +37,13 @@ namespace WpfApp_Windows_Project2
         const int height = 150;  //chiều dài mỗi ô
         const int margin = 4;
         BitmapImage baseimage = new BitmapImage(new Uri("Images/BaseImage.jpg", UriKind.Relative));
-        Image[,] images;
+
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Business.InitComponents(ref canvas,this,Rows,Cols);
-            images = new Image[Rows, Cols];
+            Business.InitComponents(ref canvas, this, Rows, Cols, ref TimerTextBlock);
+            Image[,] images = new Image[Rows, Cols];
+
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 3; j++)
@@ -76,8 +79,10 @@ namespace WpfApp_Windows_Project2
             var position = e.GetPosition(this);
             int i = (int)(position.Y - startY - Header.ActualHeight) / (height + 2);
             int j = ((int)position.X - startX) / (width + 2);
+            if (Business.isPlaying == false)
+                return;
             
-            if (_isDragging == true)
+            if (_isDragging == true )
             {
                 Tuple<int, int> newPosition = new Tuple<int, int>(i, j);
                 Business.DrapAndDrop(_selectedBitmap, startMove, newPosition);
@@ -140,23 +145,6 @@ namespace WpfApp_Windows_Project2
         {
         }
 
-        private void previewImage_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            var animation = new DoubleAnimation();
-            animation.From = 200;
-            animation.To = 300;
-            animation.Duration = new Duration(TimeSpan.FromSeconds(1));
-            animation.AutoReverse = true;
-            animation.RepeatBehavior = RepeatBehavior.Forever;
-
-            var story = new Storyboard();
-            story.Children.Add(animation);
-            Storyboard.SetTargetName(animation, previewImage.Name);
-            Storyboard.SetTargetProperty(animation, new PropertyPath(Canvas.LeftProperty));
-            story.Begin(this);
-        }
-
-
 
         private void New_MenuItem_Click(object sender, RoutedEventArgs e)
         {
@@ -217,13 +205,30 @@ namespace WpfApp_Windows_Project2
                     MessageBox.Show(err.Message);
                     return;
                 }
+
                 Business.StartNewGame(Rows,Cols);
             }
         }
 
+        //public void timer_Tick(object sender, EventArgs e)
+        //{
+        //    if (Business.isPlaying == true)
+        //    {
+        //        TimeSpan res = DateTime.Now.Subtract(Business.TimeStart);
+        //        TimerTextBlock.Text = res.ToString(@"hh\:mm\:ss");
+        //    }
+        //    else
+        //    {
+        //        Business.timer.Stop();
+        //        TimerTextBlock.Text = "00:00:00";
+        //        Business.TimeStart = DateTime.Now;
+        //    }
+        //}
+
         private void Leaderboard_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-
+            Leaderboard f = new Leaderboard();
+            f.ShowDialog();
         }
 
         private void Up_Btn_Click(object sender, RoutedEventArgs e)
@@ -283,5 +288,10 @@ namespace WpfApp_Windows_Project2
 
         }
 
+        private void MenuItem_Click_1(object sender, RoutedEventArgs e)
+        {
+            var screen = new Option();
+            screen.Show();
+        }
     }
 }

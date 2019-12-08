@@ -1,16 +1,19 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 
 namespace WpfApp_Windows_Project2
 {
@@ -21,17 +24,26 @@ namespace WpfApp_Windows_Project2
         const int width = 150;   //chiều rộng mỗi ô
         const int height = 150;  //chiều dài mỗi ô
         const int margin = 4;
+        public static int defaultTimePlay = 180;
         public static bool isPlaying = false;
         private static int lastDirection = -1;
         private static bool isShuffling = false;
+        private static bool isHintMove = false;
+        public static bool hintHasPenalty = true;
+        public static Timer timer;
+        private static int timePlay;
+        private static Window window;
 
         /// <summary>
         /// Reset tro choi
         /// </summary>
         public static void StartNewGame(int Rows, int Cols)
         {
+            if (UI.isEmpty) return;
             UpdateTempData(null);
             List<string> TempData = new List<string>();
+            isPlaying = true;
+
 
             Database.ConstructDatabase(Rows, Cols);
             UI.ResetBoard();
@@ -39,13 +51,13 @@ namespace WpfApp_Windows_Project2
             //Shuffle
             isShuffling = true;
             Random rnd = new Random();
-            int lastDirection = -1;
+            int LastDirection = -1;
             int curDirection = -1;
             for (int i = 0; i < 150; i++)
             {
                 curDirection = rnd.Next(1, 100) % 4 + 1;
-                if (Math.Abs(curDirection - lastDirection) == 1 &&
-                    (curDirection != 2 && lastDirection != 3) && (curDirection != 3 && lastDirection != 2))
+                if (Math.Abs(curDirection - LastDirection) == 1 &&
+                    (curDirection != 2 && LastDirection != 3) && (curDirection != 3 && LastDirection != 2))
                 {
                     i--;
                     continue;
@@ -53,37 +65,88 @@ namespace WpfApp_Windows_Project2
                 if (Business.DirectionalMovement(curDirection))
                 {
                     string datatosave = Database.ToString();
-                    datatosave += " | ";
-                    switch (curDirection)
+                    int existOptimalPath = TraverseTempData(datatosave, TempData);
+                    if (existOptimalPath != -1)
                     {
-                        case 1:
-                            {
-                                datatosave += "2";
-                                break;
-                            }
-                        case 2:
-                            {
-                                datatosave += "1";
-                                break;
-                            }
-                        case 3:
-                            {
-                                datatosave += "4";
-                                break;
-                            }
-                        default:
-                            {
-                                datatosave += "3";
-                                break;
-                            }
+                        TempData.RemoveRange(0, existOptimalPath);
+                        string[] tokens = TempData[0].Split(new string[] { " | " }, StringSplitOptions.RemoveEmptyEntries);
+                        int tempDir = int.Parse(tokens[1]);
+                        if (tempDir == 1 || tempDir == 2) curDirection = tempDir == 1 ? 2 : 1;
+                        else curDirection = tempDir == 3 ? 4 : 3;
                     }
-                    TempData.Insert(0, datatosave);
+                    else
+                    {
+                        datatosave += " | ";
+                        switch (curDirection)
+                        {
+                            case 1:
+                                {
+                                    datatosave += "2";
+                                    break;
+                                }
+                            case 2:
+                                {
+                                    datatosave += "1";
+                                    break;
+                                }
+                            case 3:
+                                {
+                                    datatosave += "4";
+                                    break;
+                                }
+                            default:
+                                {
+                                    datatosave += "3";
+                                    break;
+                                }
+                        }
+                        TempData.Insert(0, datatosave);
+                    }
+                    
                 }
-                lastDirection = curDirection;
+                LastDirection = curDirection;
             }
             isShuffling = false;
             UpdateTempData(TempData);
-            isPlaying = true;
+            timePlay = defaultTimePlay;
+            UI.changeClock(timePlay);
+
+            if (timer != null)
+                timer.Close();
+            timer = new Timer();
+            timer.Interval = 1000;
+            timer.Elapsed += timer_Elapsed;
+            timer.Start();
+
+        }
+        private static void timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            if (isPlaying)
+            {
+                timePlay--;
+
+                window.Dispatcher.Invoke(() =>
+                {
+                    if(timePlay >=0)
+                        UI.changeClock(timePlay);
+
+                    checkTimeUp();
+
+                });
+            }
+
+        }
+
+        private static void checkTimeUp()
+        {
+            if (timePlay <= 0)
+            {
+                isPlaying = false;
+                UI.losingAnnouncement();
+                UI.changeClock(0        );
+                timer.Close();
+                StartNewGame(3, 3);
+            }
         }
 
         /// <summary>
@@ -92,11 +155,13 @@ namespace WpfApp_Windows_Project2
         /// <param name="canvas">canvas</param>
         /// <param name="Rows">so dong</param>
         /// <param name="Cols">so cot</param>
-        public static void InitComponents(ref Canvas canvas,Window wd, int Rows,int Cols)
+        public static void InitComponents(ref Canvas canvas,Window wd, int Rows,int Cols, ref TextBlock textBlock)
         {
+            window = wd;
             Database.ConstructDatabase(Rows, Cols);
-            UI.Start(ref canvas, wd, Rows, Cols);
+            UI.Start(ref canvas, wd, Rows, Cols,ref textBlock);
             UI.DrawLines();
+            GetOptionReady();
         }
         
         /// <summary>
@@ -111,7 +176,7 @@ namespace WpfApp_Windows_Project2
             if (!check) return check;
 
             //Luu du lieu vao hint(temp data)
-            if (isPlaying)
+            if (isPlaying && !isHintMove &&!isShuffling)
             {
                 string datatosave = Database.ToString();
                 int existOptimalPath = TraverseTempData(datatosave, GetTempData());
@@ -146,16 +211,31 @@ namespace WpfApp_Windows_Project2
                 }
             }
             
-
             UI.SwapPosition(point1, point2);
-            if (Database.CheckWin()&&!isShuffling&&!UI.isEmpty)
+            if (Database.CheckWin() && !isShuffling && !UI.isEmpty)
             {
+                timer.Close();
+                UI.changeClock(0);
+
                 //Luu diem cua nguoi choi
-                MessageBox.Show("You won!");
-                Business.StartNewGame(3,3);
+                String namePlayer;
+                var screen = new WinNotification();
+                if(screen.ShowDialog() == true)
+                {
+                    string Dir = $"{AppDomain.CurrentDomain.BaseDirectory}leaderboard.txt";
+                    using (StreamWriter sw = File.AppendText(Dir))
+                    {
+                        namePlayer = screen.NamePlayer.ToString().Replace("System.Windows.Controls.TextBox: ", ""); 
+                        sw.WriteLine($"{namePlayer}|{defaultTimePlay - timePlay}");
+                    }
+                }
+
+                Business.StartNewGame(3, 3);
             }
             return check;
         }
+
+    
 
         /// <summary>
         /// Thực hiện việc xử lý khi kéo thả hình ảnh
@@ -166,6 +246,9 @@ namespace WpfApp_Windows_Project2
         /// <returns>true|| false nếu thành công hoặc thất bại</returns>
         public static bool DrapAndDrop(Image selectedBitmap, Tuple<int, int> startPoint, Tuple<int, int> endPoint)
         {
+            if (!isPlaying)
+                return false;
+
             Tuple<int, int> blankSpot = Database.GetEmptySpot();
 
             UI.disableAnim = true;
@@ -242,6 +325,9 @@ namespace WpfApp_Windows_Project2
         /// <returns></returns>
         public static bool DirectionalMovement(int direction)
         {
+            if (!isPlaying)
+                return false;
+
             lastDirection = direction;
             Tuple<int, int> blankSpot = Database.GetEmptySpot();
             switch (direction)
@@ -296,8 +382,7 @@ namespace WpfApp_Windows_Project2
                 }catch(Exception e) { Tempdata = new List<string>(); }
                 matrix.Add(Tempdata.Count.ToString());
                 for (int i = 0; i < Tempdata.Count; i++) matrix.Add(Tempdata[i]);
-
-                //Save thoi gian
+                matrix.Add(timePlay.ToString());
 
                 File.WriteAllLines(saveFileDialog1.FileName, matrix.ToArray());
                 MessageBox.Show("Game saved");
@@ -322,6 +407,7 @@ namespace WpfApp_Windows_Project2
                     string link = data[0];
                     if (!File.Exists(link)) throw (new Exception());
                     int[,] matrix = new int[3, 3];
+
                     for (int i = 0; i < 3; i++)
                     {
                         string[] tokens = data[i + 1].Split(' ');
@@ -330,6 +416,7 @@ namespace WpfApp_Windows_Project2
                             matrix[i, j] = int.Parse(tokens[j]);
                         }
                     }
+
                     ClearBoard();
                     bool check = Database.ImportMatrix(matrix);
                     if (!check) throw (new Exception());
@@ -345,9 +432,22 @@ namespace WpfApp_Windows_Project2
                         UpdateTempData(TempData);
                     }
                     catch(Exception e) { throw (e); }
+                    timePlay = int.Parse(data[int.Parse(data[4]) + 5]);
+                    UI.changeClock(timePlay);
+
+                    if (timer != null)
+                        timer.Close();
+                    timer = new Timer();
+                    timer.Interval = 1000;
+                    timer.Elapsed += timer_Elapsed;
+                    timer.Start();
+
                     isPlaying = true;
+
+                    /*Load thoi gian*/
+
+
                     return link;
-                    //Load thoi gian
                 }
                 catch (Exception e)
                 {
@@ -368,6 +468,8 @@ namespace WpfApp_Windows_Project2
             UpdateTempData(null);
             Database.RestartDatabase();
             UI.ClearBoard();
+            UI.changeClock(0);
+            if (timer != null) timer.Close();
         }
 
         /// <summary>
@@ -387,9 +489,20 @@ namespace WpfApp_Windows_Project2
                 }
                 string[] tokens = Tempdata[pos].Split(new string[] { " | " }, StringSplitOptions.RemoveEmptyEntries);
                 CleanTempData(pos);
+                isHintMove = true;
                 DirectionalMovement(int.Parse(tokens[1]));
+                isHintMove = false;
+                if (hintHasPenalty)
+                {
+                    timePlay -= defaultTimePlay / (Tempdata.Count*2 > 20 ? 20 : Tempdata.Count * 2);
+                }
+                
+                checkTimeUp();
+                if(isPlaying)
+                    UI.changeClock(timePlay);
+
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MessageBox.Show("Hint bi loi! Vui long reset lai board de su dung hint");
                 UpdateTempData(null);
@@ -401,6 +514,22 @@ namespace WpfApp_Windows_Project2
             string path = Directory.GetCurrentDirectory() + "\\TempData.txt";
             File.Delete(path);
         }
+        public static void SetOption(int timer,bool penalty)
+        {
+            string path = Directory.GetCurrentDirectory() + "\\Option.txt";
+            if (timer < 1 || timer >= 6000) throw (new Exception("Timer value must be between 1 - 5999"));
+            defaultTimePlay = timer;
+            hintHasPenalty = penalty;
+            string[] option = new string[2];
+            option[0] = $"Time - {defaultTimePlay}";
+            option[1] = $"Penalty - {hintHasPenalty.ToString()}";
+            File.WriteAllLines(path, option);
+            if (isPlaying)
+            {
+                StartNewGame(3, 3);
+            }
+        }
+        
 
 
 
@@ -464,6 +593,37 @@ namespace WpfApp_Windows_Project2
                 if (tokens[0].CompareTo(key) == 0) return i;
             }
             return result;
+        }
+        private static void GetOptionReady()
+        {
+            string path = Directory.GetCurrentDirectory() + "\\Option.txt";
+            if (!File.Exists(path))
+            {
+                string[] option = new string[2];
+                option[0] = $"Time - {defaultTimePlay}";
+                option[1] = $"Penalty - {hintHasPenalty.ToString()}";
+                File.WriteAllLines(path, option);
+            }
+            else
+            {
+                string[] option;
+                string[] tokens;
+                try
+                {
+                    option = File.ReadAllLines(path);
+                    tokens = option[0].Split(new string[] { " - " }, StringSplitOptions.RemoveEmptyEntries);
+                    defaultTimePlay = int.Parse(tokens[1]);
+                    tokens = option[1].Split(new string[] { " - " }, StringSplitOptions.RemoveEmptyEntries);
+                    hintHasPenalty = bool.Parse(tokens[1]);
+                }
+                catch(Exception e)
+                {
+                    option = new string[2];
+                    option[0] = $"Time - {defaultTimePlay}";
+                    option[1] = $"Penalty - {hintHasPenalty.ToString()}";
+                    File.WriteAllLines(path, option);
+                }
+            }
         }
         
     }

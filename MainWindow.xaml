@@ -13,20 +13,20 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top" Name="Header" Height="20" Background="Black">
             <MenuItem Header="Actions" Foreground="White" Focusable="False">
-                <MenuItem Header="Shuffle" Click="New_MenuItem_Click"  Foreground="Black"/>
-                <MenuItem Header="Clear" Click="MenuItem_Click" Foreground="Black"/>
-                <MenuItem Header="Save" Click="Save_MenuItem_Click" Foreground="Black"/>
-                <MenuItem Header="Load" Click="Load_MenuItem_Click" Foreground="Black"/>
+                <MenuItem Header="Shuffle" Click="New_MenuItem_Click"  Foreground="Black" />
+                <MenuItem Header="Clear" Click="MenuItem_Click" Foreground="Black" />
+                <MenuItem Header="Save" Click="Save_MenuItem_Click" Foreground="Black" />
+                <MenuItem Header="Load" Click="Load_MenuItem_Click" Foreground="Black" />
             </MenuItem>
             <MenuItem Header="Leaderboard " Click="Leaderboard_MenuItem_Click"  Foreground="White" Focusable="False"/>
+            <MenuItem Header="Option" Click="MenuItem_Click_1" Foreground="White" Focusable="False"/>
         </Menu>
         <Canvas Name="canvas" DockPanel.Dock="Left" Width="600" >
         </Canvas>
         <StackPanel DockPanel.Dock="Right" Margin="0" Background="Black">
-            <TextBlock Text="0:00:00" HorizontalAlignment="Center" FontSize="20" FontWeight="Bold" Foreground="White"/>
+            <TextBlock Name="TimerTextBlock" Text="00:00" HorizontalAlignment="Center" FontSize="20" FontWeight="Bold" Foreground="White"/>
             <StackPanel>
                 <Image x:Name="previewImage" Source="Images/BaseImage.jpg"
-                   MouseLeftButtonUp="previewImage_MouseLeftButtonUp"
                    RenderOptions.BitmapScalingMode="HighQuality" Width="240" Height="240"/>
 
                 <Button Name="Browserbtn" Content="Browser" Width="100" Height="50" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="20 20 20 0" Click="Browserbtn_Click">
