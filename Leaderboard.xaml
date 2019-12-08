@@ -5,20 +5,22 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp_Windows_Project2"
         mc:Ignorable="d"
-        Title="Leaderboard" Height="450" Width="800">
+        Title="Leaderboard" Height="450" Width="300" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <local:TimeConverter x:Key="converter"/>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <ListView Name="LeaderboardListView" Grid.Row="0">
-            <ListViewItem>
-            </ListViewItem>
-            <DataGrid Name="LeaderboardDataGrid" AutoGenerateColumns="True" Height="230" Width="500">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Player" Binding="{Binding PlayerName}"/>
-                    <DataGridTextColumn Header="Time" Binding="{Binding Time}"/>
-                </DataGrid.Columns>
-            </DataGrid>
+
+        <ListView Name="LeaderboardListView"  HorizontalAlignment="Center" BorderThickness="0">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Player" DisplayMemberBinding="{Binding Name}" Width="180" />
+                    <GridViewColumn Header="Time" DisplayMemberBinding="{Binding Time, Converter={StaticResource converter}}" Width="70" />
+                </GridView>
+            </ListView.View>
         </ListView>
     </Grid>
 </Window>

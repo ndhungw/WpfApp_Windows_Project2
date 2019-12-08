@@ -44,22 +44,23 @@ namespace WpfApp_Windows_Project2
             images = new Image[Rows, Cols];
             timerTextBlock = textBlock;
         }
-
-        public static void timer_Tick(object sender, EventArgs e)
+        internal static void losingAnnouncement()
         {
-            if (Business.isPlaying == true)
-            {
-                TimeSpan res = DateTime.Now.Subtract(Business.TimeStart);
-                timerTextBlock.Text = res.ToString(@"hh\:mm\:ss");
-            }
-            else
-            {
-                Business.timer.Stop();
-                timerTextBlock.Text = "00:00:00";
-                Business.TimeStart = DateTime.Now;
-            }
+            MessageBox.Show("You lose");
         }
 
+
+        public static void changeClock(int timePlay)
+        {
+
+            if (timePlay <= 0)
+                timerTextBlock.Text = "00:00";
+
+            if (timePlay % 60 < 10)
+                timerTextBlock.Text = "0" + (timePlay/60).ToString() + ":0" + (timePlay%60).ToString();
+            else
+                timerTextBlock.Text = "0" + (timePlay/60).ToString() + ":" + (timePlay%60).ToString();
+        }
         /// <summary>
         /// Ve gameboard
         /// </summary>

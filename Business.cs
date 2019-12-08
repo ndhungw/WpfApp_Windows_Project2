@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -23,11 +24,14 @@ namespace WpfApp_Windows_Project2
         const int width = 150;   //chiều rộng mỗi ô
         const int height = 150;  //chiều dài mỗi ô
         const int margin = 4;
+        const int defaultTimePlay = 180;
         public static bool isPlaying = false;
         private static int lastDirection = -1;
         private static bool isShuffling = false;
-        public static DateTime TimeStart = new DateTime();
-        public static DispatcherTimer timer = new DispatcherTimer();
+
+        public static Timer timer;
+        private static int timePlay;
+        private static Window window;
 
         /// <summary>
         /// Reset tro choi
@@ -36,6 +40,8 @@ namespace WpfApp_Windows_Project2
         {
             UpdateTempData(null);
             List<string> TempData = new List<string>();
+            isPlaying = true;
+
 
             Database.ConstructDatabase(Rows, Cols);
             UI.ResetBoard();
@@ -87,15 +93,47 @@ namespace WpfApp_Windows_Project2
             }
             isShuffling = false;
             UpdateTempData(TempData);
-            isPlaying = true;
+            timePlay = defaultTimePlay;
+            UI.changeClock(timePlay);
 
-            ////set up time
-            TimeStart = DateTime.Now;//lay thoi diem hien tai
-            timer.Interval = TimeSpan.FromSeconds(1);
-            timer.Tick += UI.timer_Tick;
+            if (timer != null)
+                timer.Close();
+            timer = new Timer();
+            timer.Interval = 1000;
+            timer.Elapsed += timer_Elapsed;
             timer.Start();
+
         }
-        
+        private static void timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            if (isPlaying)
+            {
+                timePlay--;
+
+                window.Dispatcher.Invoke(() =>
+                {
+                    if(timePlay >=0)
+                        UI.changeClock(timePlay);
+
+                    checkTimeUp();
+
+                });
+            }
+
+        }
+
+        private static void checkTimeUp()
+        {
+            if (timePlay <= 0)
+            {
+                isPlaying = false;
+                UI.losingAnnouncement();
+                UI.changeClock(0        );
+                timer.Close();
+
+            }
+        }
+
         /// <summary>
         /// Khoi tao tro choi
         /// </summary>
@@ -104,6 +142,7 @@ namespace WpfApp_Windows_Project2
         /// <param name="Cols">so cot</param>
         public static void InitComponents(ref Canvas canvas,Window wd, int Rows,int Cols, ref TextBlock textBlock)
         {
+            window = wd;
             Database.ConstructDatabase(Rows, Cols);
             UI.Start(ref canvas, wd, Rows, Cols,ref textBlock);
             UI.DrawLines();
@@ -159,55 +198,28 @@ namespace WpfApp_Windows_Project2
             UI.SwapPosition(point1, point2);
             if (Database.CheckWin() && !isShuffling && !UI.isEmpty)
             {
-                Business.timer.Stop();
+                timer.Close();
+                UI.changeClock(0);
 
                 //Luu diem cua nguoi choi
-                MessageBox.Show("You won!");
-
-                /*
-                 SHOW DIALOG: Play again?
-                 Continue -> Save game (?leadboard) -> Business.StartNewGame(3, 3);
-                 Cancel -> out
-                 */
-                /*Edit Leaderboard*/
-                TimeSpan thisPlayerTime = convertStringToTimeSpan(UI.timerTextBlock.Text);
-                CheckLeaderBoard(thisPlayerTime, "player1");
+                String namePlayer;
+                var screen = new WinNotification();
+                if(screen.ShowDialog() == true)
+                {
+                    string Dir = $"{AppDomain.CurrentDomain.BaseDirectory}leaderboard.txt";
+                    using (StreamWriter sw = File.AppendText(Dir))
+                    {
+                        namePlayer = screen.NamePlayer.ToString().Replace("System.Windows.Controls.TextBox: ", ""); 
+                        sw.WriteLine($"{namePlayer}|{180 - timePlay}");
+                    }
+                }
 
                 Business.StartNewGame(3, 3);
             }
             return check;
         }
 
-        private static void CheckLeaderBoard(TimeSpan timeSpan,string playerName)
-        {
-            double resultAsSeconds = timeSpan.TotalSeconds;
-
-            /*Load file leaderboard*/
-            string path = AppDomain.CurrentDomain.BaseDirectory;
-            string[] leaderboardData = File.ReadAllLines(path + "LeaderboardData.txt");
-            
-            for(int i = leaderboardData.Length - 1; i >= 0 ; i--)
-            {
-                string[] leaderTokens = leaderboardData[i].Split(' ');//Tên - thời gian
-                string[] leaderTimeTokens = leaderTokens[1].Split(':');//Giờ - phút - giây
-                double leaderResultAsSecond = int.Parse(leaderTimeTokens[0]) * 3600 + int.Parse(leaderTimeTokens[1]) * 60 + int.Parse(leaderTimeTokens[2]);
-                if(resultAsSeconds < leaderResultAsSecond)
-                {
-                    //Edit tên
-                    leaderTokens[0] = playerName;
-                    //Edit thời gian
-                    leaderTokens[1] = timeSpan.ToString();
-                }
-            }
-            return;
-        }
-
-        public static TimeSpan convertStringToTimeSpan(string str)
-        {
-            string[] timeTokens = str.Split(':');
-            TimeSpan res = new TimeSpan(int.Parse(timeTokens[0]), int.Parse(timeTokens[1]), int.Parse(timeTokens[2]));
-            return res;
-        }
+    
 
         /// <summary>
         /// Thực hiện việc xử lý khi kéo thả hình ảnh
@@ -218,6 +230,9 @@ namespace WpfApp_Windows_Project2
         /// <returns>true|| false nếu thành công hoặc thất bại</returns>
         public static bool DrapAndDrop(Image selectedBitmap, Tuple<int, int> startPoint, Tuple<int, int> endPoint)
         {
+            if (!isPlaying)
+                return false;
+
             Tuple<int, int> blankSpot = Database.GetEmptySpot();
 
             UI.disableAnim = true;
@@ -294,6 +309,9 @@ namespace WpfApp_Windows_Project2
         /// <returns></returns>
         public static bool DirectionalMovement(int direction)
         {
+            if (!isPlaying)
+                return false;
+
             lastDirection = direction;
             Tuple<int, int> blankSpot = Database.GetEmptySpot();
             switch (direction)
@@ -349,10 +367,6 @@ namespace WpfApp_Windows_Project2
                 matrix.Add(Tempdata.Count.ToString());
                 for (int i = 0; i < Tempdata.Count; i++) matrix.Add(Tempdata[i]);
 
-                //Save thoi gian
-                matrix.Add(UI.timerTextBlock.Text);//thời gian hiện trên UI
-                matrix.Add((DateTime.Now.Subtract(TimeStart)).ToString());//TimeSpan
-
                 File.WriteAllLines(saveFileDialog1.FileName, matrix.ToArray());
                 MessageBox.Show("Game saved");
             }
@@ -405,14 +419,7 @@ namespace WpfApp_Windows_Project2
                     isPlaying = true;
 
                     /*Load thoi gian*/
-                    UI.timerTextBlock.Text = data[8];
-                    string[] timeTokens = UI.timerTextBlock.Text.Split(':');
-                    TimeSpan TimeAddition = new TimeSpan(int.Parse(timeTokens[0]), int.Parse(timeTokens[1]), int.Parse(timeTokens[2]));
 
-                    TimeStart = DateTime.Now.Subtract(TimeAddition);
-                    timer.Interval = TimeSpan.FromSeconds(1);
-                    timer.Tick += UI.timer_Tick;
-                    timer.Start();
 
                     return link;
                 }
@@ -455,8 +462,14 @@ namespace WpfApp_Windows_Project2
                 string[] tokens = Tempdata[pos].Split(new string[] { " | " }, StringSplitOptions.RemoveEmptyEntries);
                 CleanTempData(pos);
                 DirectionalMovement(int.Parse(tokens[1]));
+
+                timePlay -= 30;
+                checkTimeUp();
+                if(isPlaying)
+                    UI.changeClock(timePlay);
+
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MessageBox.Show("Hint bi loi! Vui long reset lai board de su dung hint");
                 UpdateTempData(null);

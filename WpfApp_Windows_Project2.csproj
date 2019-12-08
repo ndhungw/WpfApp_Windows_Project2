@@ -59,7 +59,11 @@
     <Compile Include="Leaderboard.xaml.cs">
       <DependentUpon>Leaderboard.xaml</DependentUpon>
     </Compile>
+    <Compile Include="TimeConverter.cs" />
     <Compile Include="UI.cs" />
+    <Compile Include="WinNotification.xaml.cs">
+      <DependentUpon>WinNotification.xaml</DependentUpon>
+    </Compile>
     <Page Include="Leaderboard.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -77,6 +81,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="WinNotification.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -112,11 +120,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\BaseImage.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="LeaderboardData.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

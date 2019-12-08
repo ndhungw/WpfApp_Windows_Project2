@@ -42,14 +42,15 @@ namespace WpfApp_Windows_Project2
         {
             Business.InitComponents(ref canvas, this, Rows, Cols, ref TimerTextBlock);
             Image[,] images = new Image[Rows, Cols];
-            ConnectToImageMatrix(ref images);
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 3; j++)
                 {
+                    images[i, j] = new Image();
                     images[i,j].Width = width;
                     images[i, j].Height = height;
                     images[i, j].Source = null;
+                    canvas.Children.Add(images[i, j]);
                     UI.setLeftTopImage(images[i, j], startX + j * (width + margin), startY + i * (height + margin));
 
                     //Events
@@ -62,18 +63,6 @@ namespace WpfApp_Windows_Project2
             UI.InitUIMatrix(ref images);
         }
 
-        private void ConnectToImageMatrix(ref Image[,] images)
-        {
-            images[0, 0] = Image0;
-            images[0, 1] = Image1;
-            images[0, 2] = Image2;
-            images[1, 0] = Image3;
-            images[1, 1] = Image4;
-            images[1, 2] = Image5;
-            images[2, 0] = Image6;
-            images[2, 1] = Image7;
-            images[2, 2] = Image8;
-        }
 
         bool _isDragging = false;
         Image _selectedBitmap = null;
@@ -85,8 +74,10 @@ namespace WpfApp_Windows_Project2
             var position = e.GetPosition(this);
             int i = (int)(position.Y - startY - Header.ActualHeight) / (height + 2);
             int j = ((int)position.X - startX) / (width + 2);
+            if (Business.isPlaying == false)
+                return;
             
-            if (_isDragging == true)
+            if (_isDragging == true )
             {
                 Tuple<int, int> newPosition = new Tuple<int, int>(i, j);
                 Business.DrapAndDrop(_selectedBitmap, startMove, newPosition);
@@ -148,23 +139,6 @@ namespace WpfApp_Windows_Project2
         private void Window_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
         }
-
-        private void previewImage_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            var animation = new DoubleAnimation();
-            animation.From = 200;
-            animation.To = 300;
-            animation.Duration = new Duration(TimeSpan.FromSeconds(1));
-            animation.AutoReverse = true;
-            animation.RepeatBehavior = RepeatBehavior.Forever;
-
-            var story = new Storyboard();
-            story.Children.Add(animation);
-            Storyboard.SetTargetName(animation, previewImage.Name);
-            Storyboard.SetTargetProperty(animation, new PropertyPath(Canvas.LeftProperty));
-            story.Begin(this);
-        }
-
 
 
         private void New_MenuItem_Click(object sender, RoutedEventArgs e)
