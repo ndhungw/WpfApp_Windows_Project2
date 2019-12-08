@@ -283,5 +283,10 @@ namespace WpfApp_Windows_Project2
 
         }
 
+        private void MenuItem_Click_1(object sender, RoutedEventArgs e)
+        {
+            var screen = new Option();
+            screen.Show();
+        }
     }
 }

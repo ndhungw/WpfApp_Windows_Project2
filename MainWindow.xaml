@@ -19,6 +19,7 @@
                 <MenuItem Header="Load" Click="Load_MenuItem_Click" Foreground="Black"/>
             </MenuItem>
             <MenuItem Header="Leaderboard " Click="Leaderboard_MenuItem_Click"  Foreground="White" Focusable="False"/>
+            <MenuItem Header="Option" Click="MenuItem_Click_1" Foreground="White"/>
         </Menu>
         <Canvas Name="canvas" DockPanel.Dock="Left" Width="600" >
         </Canvas>

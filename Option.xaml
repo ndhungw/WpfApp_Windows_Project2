@@ -1,0 +1,23 @@
+﻿<Window x:Class="WpfApp_Windows_Project2.Option"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApp_Windows_Project2"
+        mc:Ignorable="d"
+        Title="Option" Height="145" Width="300" Loaded="Window_Loaded">
+    <StackPanel Orientation="Vertical" Margin="0 10 0 0">
+        <DockPanel Margin="20 0 20 10">
+            <Label Content="Time limit: " DockPanel.Dock="Left" Width="110"/>
+            <TextBox Name="TimerLimitTxtBox" DockPanel.Dock="Right" FontSize="15" VerticalContentAlignment="Center" MaxLines="1"/>
+        </DockPanel>
+        <DockPanel Margin="20 0 20 0">
+            <Label Content="Hint has penalty: " DockPanel.Dock="Left" Width="110"/>
+            <RadioButton Content="True" Name="PenaltyTrue" GroupName="Penalty" VerticalAlignment="Center"/>
+            <RadioButton Content="False" Name="PenaltyFalse" GroupName="Penalty" VerticalAlignment="Center" Margin="10 0 0 0"/>
+        </DockPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Name="OK" Click="OK_Click" Content="Apply" Padding="5 2 5 2" Margin="0 10 15 0"/>
+        </StackPanel>
+    </StackPanel>
+</Window>
