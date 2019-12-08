@@ -38,10 +38,12 @@ namespace WpfApp_Windows_Project2
         const int margin = 4;
         BitmapImage baseimage = new BitmapImage(new Uri("Images/BaseImage.jpg", UriKind.Relative));
 
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Business.InitComponents(ref canvas, this, Rows, Cols, ref TimerTextBlock);
             Image[,] images = new Image[Rows, Cols];
+
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 3; j++)
@@ -71,6 +73,9 @@ namespace WpfApp_Windows_Project2
 
         private void CropImage_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            var imageCrop = sender as Image;
+            UI.setZIndex(imageCrop);
+
             var position = e.GetPosition(this);
             int i = (int)(position.Y - startY - Header.ActualHeight) / (height + 2);
             int j = ((int)position.X - startX) / (width + 2);

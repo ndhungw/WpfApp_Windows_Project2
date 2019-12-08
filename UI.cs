@@ -348,5 +348,20 @@ namespace WpfApp_Windows_Project2
             cols[blankSpot.Item2, blankSpot.Item1].Stroke = new SolidColorBrush(Colors.Red);
             cols[blankSpot.Item2 + 1, blankSpot.Item1].Stroke = new SolidColorBrush(Colors.Red);
         }
+
+        public static void setZIndex(Image image)
+        {
+
+            for (int i  = 0; i< images.GetLength(0) ; i++)
+            {
+                for (int j = 0; j < images.GetLength(1); j++)
+                {
+                    Canvas.SetZIndex(images[i, j], 0);
+
+                }
+            }
+
+            Canvas.SetZIndex(image, 1);
+        }
     }
 }
