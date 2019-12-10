@@ -21,7 +21,7 @@ namespace WpfApp_Windows_Project2
     /// </summary>
     public partial class Leaderboard : Window
     {
-        public class Player
+        public class Player 
         {
             public String Name { get; set; }
             public int Time { get; set; }
@@ -41,7 +41,7 @@ namespace WpfApp_Windows_Project2
             if (!File.Exists(Dir))
                 return;
             var reader = new StreamReader(Dir);
-            LeaderboardListView.ItemsSource = listPlayer;
+            int count;
 
             while (true)
             {
@@ -52,7 +52,27 @@ namespace WpfApp_Windows_Project2
                 listPlayer.Add(new Player() { Name = token[0], Time = int.Parse(token[1]) });
             }
 
+            sortTime();
+
+            while (listPlayer.Count > 10)
+                listPlayer.RemoveAt(listPlayer.Count - 1);
+
+            LeaderboardListView.ItemsSource = listPlayer;
 
         }
+
+
+        private void sortTime()
+        {
+            for (int i = 0; i < listPlayer.Count - 1; i++)
+                for (int j = i + 1; j < listPlayer.Count; j++)
+                    if (listPlayer[i].Time > listPlayer[j].Time)
+                    {
+                        Player temp = listPlayer[i];
+                        listPlayer[i] = listPlayer[j];
+                        listPlayer[j] = temp;
+                    }
+        }
+
     }
 }
